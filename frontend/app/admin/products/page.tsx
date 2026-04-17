@@ -35,7 +35,10 @@ export default function AdminProducts() {
           return {
             ...normalized,
             _id: normalized.id, // Keep _id for admin panel compatibility if needed
-            categoryName: normalized.category?.name || (typeof normalized.category === 'string' ? normalized.category : 'Uncategorized'),
+            categoryName:
+              typeof p.category === "object"
+                ? p.category.name
+                : p.category || "",
           };
         });
         setProducts(apiProducts);
@@ -238,7 +241,7 @@ export default function AdminProducts() {
                     </td>
                     <td className="px-6 py-4 font-medium text-[var(--color-foreground)]">{product.name}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
-                      {product.category?.name || 'Uncategorized'}
+                      {product.categoryName || 'Uncategorized'}
                     </td>
                     <td className="px-6 py-4 font-medium text-[var(--color-foreground)]">
                       <div className="flex flex-col">
