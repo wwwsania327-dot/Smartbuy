@@ -54,14 +54,14 @@ function OrderRow({
 
         {/* Customer */}
         <td className="px-5 py-4">
-          <p className="text-sm font-semibold text-[var(--color-foreground)]">{order.address.fullName}</p>
-          <p className="text-xs text-gray-400">{order.address.phone}</p>
+          <p className="text-sm font-semibold text-[var(--color-foreground)]">{order.shippingAddress.fullName}</p>
+          <p className="text-xs text-gray-400">{order.shippingAddress.phone}</p>
         </td>
 
         {/* Items preview */}
         <td className="px-5 py-4">
           <div className="flex items-center gap-1.5">
-            {order.items.slice(0, 3).map((item, i) => (
+            {order.orderItems.slice(0, 3).map((item, i) => (
               <img
                 key={i}
                 src={item.image}
@@ -72,7 +72,7 @@ function OrderRow({
               />
             ))}
             <span className="text-xs text-gray-500 ml-1">
-              {order.items.length} item{order.items.length > 1 ? "s" : ""}
+              {order.orderItems.length} item{order.orderItems.length > 1 ? "s" : ""}
             </span>
           </div>
         </td>
@@ -136,10 +136,10 @@ function OrderRow({
                   ))}
                 </div>
                 <div className="mt-4 pt-3 border-t border-dashed border-gray-200 dark:border-gray-700 space-y-1 text-xs text-gray-500">
-                  <div className="flex justify-between"><span>Subtotal</span><span>₹{order.subtotal.toFixed(2)}</span></div>
-                  <div className="flex justify-between"><span>Tax (5%)</span><span>₹{order.taxes.toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span>Subtotal</span><span>₹{order.itemsPrice.toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span>Tax (5%)</span><span>₹{order.taxPrice.toFixed(2)}</span></div>
                   <div className="flex justify-between font-bold text-sm text-[var(--color-foreground)] pt-1">
-                    <span>Total</span><span>₹{order.totalAmount.toFixed(2)}</span>
+                    <span>Total</span><span>₹{order.totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -150,10 +150,10 @@ function OrderRow({
                 <div className="flex items-start gap-3 bg-white dark:bg-[#1e293b] border border-[var(--color-border)] rounded-xl p-4">
                   <MapPin className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
                   <div className="text-sm space-y-0.5">
-                    <p className="font-bold text-[var(--color-foreground)]">{order.address.fullName}</p>
-                    <p className="text-gray-500">{order.address.phone}</p>
-                    <p className="text-gray-600 dark:text-gray-300">{order.address.addressLine}</p>
-                    <p className="text-gray-600 dark:text-gray-300">{order.address.city} — {order.address.pincode}</p>
+                    <p className="font-bold text-[var(--color-foreground)]">{order.shippingAddress.fullName}</p>
+                    <p className="text-gray-500">{order.shippingAddress.phone}</p>
+                    <p className="text-gray-600 dark:text-gray-300">{order.shippingAddress.addressLine1}{order.shippingAddress.addressLine2 ? `, ${order.shippingAddress.addressLine2}` : ""}</p>
+                    <p className="text-gray-600 dark:text-gray-300">{order.shippingAddress.city}, {order.shippingAddress.state} — {order.shippingAddress.zipCode}</p>
                   </div>
                 </div>
 
@@ -224,15 +224,15 @@ export default function AdminOrdersPage() {
     const matchSearch =
       !q ||
       o.id.toLowerCase().includes(q) ||
-      o.address.fullName.toLowerCase().includes(q) ||
-      o.address.phone.includes(q) ||
-      o.items.some((i) => i.name.toLowerCase().includes(q));
+      o.shippingAddress.fullName.toLowerCase().includes(q) ||
+      o.shippingAddress.phone.includes(q) ||
+      o.orderItems.some((i) => i.name.toLowerCase().includes(q));
     const matchStatus = statusFilter === "all" || o.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
   // Stats
-  const revenue = orders.reduce((s, o) => s + o.totalAmount, 0);
+  const revenue = orders.reduce((s, o) => s + (o.totalPrice || 0), 0);
   const confirmed = orders.filter((o) => o.status === "confirmed").length;
   const delivered = orders.filter((o) => o.status === "delivered").length;
 

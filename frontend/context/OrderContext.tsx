@@ -6,9 +6,11 @@ import { useAuth } from "./AuthContext";
 export interface OrderAddress {
   fullName: string;
   phone: string;
-  addressLine: string;
+  addressLine1: string;
+  addressLine2?: string;
   city: string;
-  pincode: string;
+  state: string;
+  zipCode: string;
 }
 
 export interface OrderItem {
@@ -74,6 +76,20 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // ── Cleanup old address format ───────────────
+    const raw = localStorage.getItem(ADDRESS_KEY);
+    if (raw) {
+      try {
+        const addr = JSON.parse(raw);
+        if (addr.addressLine || addr.pincode) {
+          console.log('[OrderContext] Cleaning up old address format from localStorage');
+          localStorage.removeItem(ADDRESS_KEY);
+        }
+      } catch (e) {
+        localStorage.removeItem(ADDRESS_KEY);
+      }
+    }
+
     if (user) fetchOrders();
     else setOrders([]);
   }, [user]);

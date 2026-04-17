@@ -12,28 +12,28 @@ import Link from "next/link";
 const STATUS_CONFIG: Record<string, {
   label: string; color: string; bg: string; border: string; icon: React.ReactNode; step: number;
 }> = {
-  Processing:       { label: "Processing",       color: "text-blue-600 dark:text-blue-400",   bg: "bg-blue-50 dark:bg-blue-900/30",   border: "border-blue-200 dark:border-blue-800",   icon: <CheckCircle2 className="w-3.5 h-3.5" />,                  step: 1 },
-  Shipped:          { label: "Shipped",          color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/30", border: "border-indigo-200 dark:border-indigo-800", icon: <Package className="w-3.5 h-3.5" />,                         step: 2 },
-  "Out for Delivery":{ label: "Out for Delivery", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/30", border: "border-amber-200 dark:border-amber-800", icon: <Truck className="w-3.5 h-3.5" />,                         step: 3 },
-  Delivered:       { label: "Delivered",        color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/30", border: "border-green-200 dark:border-green-800", icon: <CheckCircle2 className="w-3.5 h-3.5" />,                  step: 4 },
-  Cancelled:       { label: "Cancelled",        color: "text-red-500 dark:text-red-400",     bg: "bg-red-50 dark:bg-red-900/30",     border: "border-red-200 dark:border-red-800",     icon: <XCircle className="w-3.5 h-3.5" />,                      step: 0 },
+  Processing: { label: "Processing", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/30", border: "border-blue-200 dark:border-blue-800", icon: <CheckCircle2 className="w-3.5 h-3.5" />, step: 1 },
+  Shipped: { label: "Shipped", color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/30", border: "border-indigo-200 dark:border-indigo-800", icon: <Package className="w-3.5 h-3.5" />, step: 2 },
+  "Out for Delivery": { label: "Out for Delivery", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/30", border: "border-amber-200 dark:border-amber-800", icon: <Truck className="w-3.5 h-3.5" />, step: 3 },
+  Delivered: { label: "Delivered", color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/30", border: "border-green-200 dark:border-green-800", icon: <CheckCircle2 className="w-3.5 h-3.5" />, step: 4 },
+  Cancelled: { label: "Cancelled", color: "text-red-500 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/30", border: "border-red-200 dark:border-red-800", icon: <XCircle className="w-3.5 h-3.5" />, step: 0 },
 };
 
-const FILTER_TABS: { label: string; value: string | "all" }[] = [
-  { label: "All",               value: "all" },
-  { label: "Processing",        value: "Processing" },
-  { label: "Shipped",           value: "Shipped" },
-  { label: "Delivered",         value: "Delivered" },
-  { label: "Cancelled",         value: "Cancelled" },
+const FILTER_TABS: { label: string; value: OrderStatus | "all" }[] = [
+  { label: "All", value: "all" },
+  { label: "Processing", value: "Processing" },
+  { label: "Shipped", value: "Shipped" },
+  { label: "Delivered", value: "Delivered" },
+  { label: "Cancelled", value: "Cancelled" },
 ];
 
 // ─── Delivery Progress Bar ────────────────────────────────────────────────────
 function DeliveryProgress({ status }: { status: string }) {
   if (status === "Cancelled") return null;
   const steps = [
-    { label: "Processing",    s: "Processing"        },
-    { label: "Shipped",       s: "Shipped"           },
-    { label: "Delivered",     s: "Delivered"         },
+    { label: "Processing", s: "Processing" },
+    { label: "Shipped", s: "Shipped" },
+    { label: "Delivered", s: "Delivered" },
   ];
   const currentStep = STATUS_CONFIG[status]?.step || 1;
 
@@ -188,7 +188,8 @@ function OrderCard({ order }: { order: Order }) {
             <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
               <p className="font-semibold text-[var(--color-foreground)]">{order.shippingAddress?.fullName}</p>
               <p>{order.shippingAddress?.phone}</p>
-              <p>{order.shippingAddress?.addressLine1}, {order.shippingAddress?.city} — {order.shippingAddress?.zipCode}</p>
+              <p>{order.shippingAddress?.addressLine1}{order.shippingAddress?.addressLine2 ? `, ${order.shippingAddress?.addressLine2}` : ""}</p>
+              <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} — {order.shippingAddress?.zipCode}</p>
             </div>
           </div>
         </div>

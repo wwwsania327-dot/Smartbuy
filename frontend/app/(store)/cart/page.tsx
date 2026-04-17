@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 type Step = "idle" | "confirm" | "address" | "success";
 
 const EMPTY_FORM: OrderAddress = {
-  fullName: "", phone: "", addressLine: "", city: "", pincode: "",
+  fullName: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", zipCode: "",
 };
 
 // ─── Address Form Component ───────────────────────────────────────────────────
@@ -28,12 +28,13 @@ function AddressForm({
   const [errors, setErrors] = useState<Partial<OrderAddress>>({});
 
   function validate() {
-    const e: Partial<OrderAddress> = {};
+    const e: Partial<Record<keyof OrderAddress, string>> = {};
     if (!form.fullName.trim())      e.fullName     = "Full name is required";
     if (!/^[6-9]\d{9}$/.test(form.phone)) e.phone = "Enter a valid 10-digit mobile number";
-    if (!form.addressLine.trim())   e.addressLine  = "Address is required";
+    if (!form.addressLine1.trim())  e.addressLine1 = "Address is required";
     if (!form.city.trim())          e.city         = "City is required";
-    if (!/^\d{6}$/.test(form.pincode)) e.pincode   = "Enter a valid 6-digit pincode";
+    if (!form.state.trim())         e.state        = "State is required";
+    if (!/^\d{6}$/.test(form.zipCode)) e.zipCode   = "Enter a valid 6-digit zip code";
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -74,11 +75,13 @@ function AddressForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {field("fullName",    "Full Name",    "e.g. Rahul Sharma")}
       {field("phone",       "Phone Number", "10-digit mobile number", "tel", "tel")}
-      {field("addressLine", "Address Line", "House no, Street, Locality")}
+      {field("addressLine1", "Address Line 1", "House no, Street, Locality")}
+      {field("addressLine2", "Address Line 2 (Optional)", "Landmark, Apartment, etc.")}
       <div className="grid grid-cols-2 gap-3">
-        {field("city",    "City",    "e.g. Mumbai")}
-        {field("pincode", "Pincode", "e.g. 400001", "text", "numeric")}
+        {field("city", "City", "e.g. Mumbai")}
+        {field("state", "State", "e.g. Maharashtra")}
       </div>
+      {field("zipCode", "Zip Code", "e.g. 400001", "text", "numeric")}
 
       <div className="flex gap-3 pt-2">
         <button
@@ -140,10 +143,11 @@ export default function CartPage() {
       orderItems: items,
       shippingAddress: {
         fullName: addr.fullName,
-        addressLine1: addr.addressLine,
+        addressLine1: addr.addressLine1,
+        addressLine2: addr.addressLine2 || "",
         city: addr.city,
-        state: "DefaultState", // Backend expects state, adding placeholder
-        zipCode: addr.pincode,
+        state: addr.state,
+        zipCode: addr.zipCode,
         phone: addr.phone
       },
       paymentMethod: "COD",
@@ -395,7 +399,7 @@ export default function CartPage() {
                       </div>
                       <p className="text-xs text-gray-500 mt-2 ml-6 leading-relaxed">
                         {savedAddress.fullName} · {savedAddress.phone}<br />
-                        {savedAddress.addressLine}, {savedAddress.city} — {savedAddress.pincode}
+                        {savedAddress.addressLine1}, {savedAddress.city}, {savedAddress.state} — {savedAddress.zipCode}
                       </p>
                     </div>
                     <div
