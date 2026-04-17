@@ -9,10 +9,11 @@ const ORDERS_KEY   = "smartbuy_orders";
 const PRODUCTS_KEY = "admin_products";
 
 const STATUS_BADGE: Record<OrderStatus, { label: string; cls: string }> = {
-  confirmed:        { label: "Confirmed",        cls: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" },
-  out_for_delivery: { label: "Out for Delivery", cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
-  delivered:        { label: "Delivered",        cls: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" },
-  cancelled:        { label: "Cancelled",        cls: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400" },
+  Processing:       { label: "Processing",       cls: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" },
+  Shipped:          { label: "Shipped",          cls: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" },
+  "Out for Delivery": { label: "Out for Delivery", cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
+  Delivered:        { label: "Delivered",        cls: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" },
+  Cancelled:        { label: "Cancelled",        cls: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400" },
 };
 
 export default function AdminDashboard() {
@@ -37,8 +38,8 @@ export default function AdminDashboard() {
 
   // ── Live stats ──────────────────────────────────────────────────────────────
   const revenue   = orders.reduce((s, o) => s + o.totalAmount, 0);
-  const pending   = orders.filter((o) => o.status === "confirmed" || o.status === "out_for_delivery").length;
-  const delivered = orders.filter((o) => o.status === "delivered").length;
+  const pending   = orders.filter((o) => o.status === "Processing" || o.status === "Shipped" || o.status === "Out for Delivery").length;
+  const delivered = orders.filter((o) => o.status === "Delivered").length;
 
   const stats = [
     {

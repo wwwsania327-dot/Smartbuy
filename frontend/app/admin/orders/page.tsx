@@ -10,17 +10,19 @@ import {
 const STORAGE_KEY = "smartbuy_orders";
 
 const STATUS_OPTIONS: { value: OrderStatus; label: string; color: string; bg: string }[] = [
-  { value: "confirmed",        label: "Confirmed",         color: "text-blue-700 dark:text-blue-300",   bg: "bg-blue-100 dark:bg-blue-900/40"   },
-  { value: "out_for_delivery", label: "Out for Delivery",  color: "text-amber-700 dark:text-amber-300", bg: "bg-amber-100 dark:bg-amber-900/40" },
-  { value: "delivered",        label: "Delivered",         color: "text-green-700 dark:text-green-300", bg: "bg-green-100 dark:bg-green-900/40" },
-  { value: "cancelled",        label: "Cancelled",         color: "text-red-600 dark:text-red-400",     bg: "bg-red-100 dark:bg-red-900/40"     },
+  { value: "Processing",       label: "Processing",        color: "text-blue-700 dark:text-blue-300",   bg: "bg-blue-100 dark:bg-blue-900/40"   },
+  { value: "Shipped",          label: "Shipped",           color: "text-indigo-700 dark:text-indigo-300", bg: "bg-indigo-100 dark:bg-indigo-900/40" },
+  { value: "Out for Delivery", label: "Out for Delivery",  color: "text-amber-700 dark:text-amber-300", bg: "bg-amber-100 dark:bg-amber-900/40" },
+  { value: "Delivered",        label: "Delivered",         color: "text-green-700 dark:text-green-300", bg: "bg-green-100 dark:bg-green-900/40" },
+  { value: "Cancelled",        label: "Cancelled",         color: "text-red-600 dark:text-red-400",     bg: "bg-red-100 dark:bg-red-900/40"     },
 ];
 
 const STATUS_ICON: Record<OrderStatus, React.ReactNode> = {
-  confirmed:        <CheckCircle2 className="w-3.5 h-3.5" />,
-  out_for_delivery: <Truck className="w-3.5 h-3.5" />,
-  delivered:        <CheckCircle2 className="w-3.5 h-3.5" />,
-  cancelled:        <XCircle className="w-3.5 h-3.5" />,
+  Processing:        <CheckCircle2 className="w-3.5 h-3.5" />,
+  Shipped:           <Package className="w-3.5 h-3.5" />,
+  "Out for Delivery": <Truck className="w-3.5 h-3.5" />,
+  Delivered:        <CheckCircle2 className="w-3.5 h-3.5" />,
+  Cancelled:        <XCircle className="w-3.5 h-3.5" />,
 };
 
 function statusCfg(s: OrderStatus) {
@@ -233,8 +235,8 @@ export default function AdminOrdersPage() {
 
   // Stats
   const revenue = orders.reduce((s, o) => s + (o.totalPrice || 0), 0);
-  const confirmed = orders.filter((o) => o.status === "confirmed").length;
-  const delivered = orders.filter((o) => o.status === "delivered").length;
+  const processing = orders.filter((o) => o.status === "Processing").length;
+  const delivered = orders.filter((o) => o.status === "Delivered").length;
 
   return (
     <div className="space-y-6">
@@ -248,7 +250,7 @@ export default function AdminOrdersPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Orders",   value: orders.length,          color: "indigo", icon: Package },
-          { label: "Confirmed",      value: confirmed,              color: "blue",   icon: Clock },
+          { label: "Processing",     value: processing,             color: "blue",   icon: Clock },
           { label: "Delivered",      value: delivered,              color: "green",  icon: CheckCircle2 },
           { label: "Total Revenue",  value: `₹${revenue.toFixed(0)}`, color: "purple", icon: Package },
         ].map((c, i) => (
