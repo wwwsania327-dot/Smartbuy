@@ -37,7 +37,7 @@ export default function AdminDashboard() {
   }, []);
 
   // ── Live stats ──────────────────────────────────────────────────────────────
-  const revenue   = orders.reduce((s, o) => s + o.totalAmount, 0);
+  const revenue   = orders.reduce((s, o) => s + (o.totalPrice || 0), 0);
   const pending   = orders.filter((o) => o.status === "Processing" || o.status === "Shipped" || o.status === "Out for Delivery").length;
   const delivered = orders.filter((o) => o.status === "Delivered").length;
 
@@ -141,12 +141,12 @@ export default function AdminDashboard() {
                     <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#0f172a]/60 transition-colors">
                       <td className="px-5 py-3.5 font-bold text-[var(--color-foreground)]">#{order.id}</td>
                       <td className="px-5 py-3.5">
-                        <p className="font-medium text-[var(--color-foreground)]">{order.address.fullName}</p>
-                        <p className="text-xs text-gray-400">{order.address.phone}</p>
+                        <p className="font-medium text-[var(--color-foreground)]">{order.shippingAddress.fullName}</p>
+                        <p className="text-xs text-gray-400">{order.shippingAddress.phone}</p>
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-1.5">
-                          {order.items.slice(0, 2).map((item, i) => (
+                          {order.orderItems.slice(0, 2).map((item: any, i: number) => (
                             <img
                               key={i}
                               src={item.image}
@@ -156,11 +156,11 @@ export default function AdminDashboard() {
                               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                             />
                           ))}
-                          <span className="text-xs text-gray-400">{order.items.length} item{order.items.length > 1 ? "s" : ""}</span>
+                          <span className="text-xs text-gray-400">{order.orderItems.length} item{order.orderItems.length > 1 ? "s" : ""}</span>
                         </div>
                       </td>
                       <td className="px-5 py-3.5 text-gray-500">{order.date}</td>
-                      <td className="px-5 py-3.5 font-bold text-[var(--color-foreground)]">₹{order.totalAmount.toFixed(2)}</td>
+                      <td className="px-5 py-3.5 font-bold text-[var(--color-foreground)]">₹{(order.totalPrice || 0).toFixed(2)}</td>
                       <td className="px-5 py-3.5">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${sc.cls}`}>
                           {sc.label}

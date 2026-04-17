@@ -84,7 +84,7 @@ function OrderRow({
 
         {/* Amount */}
         <td className="px-5 py-4 font-bold text-sm text-[var(--color-foreground)]">
-          ₹{order.totalAmount.toFixed(2)}
+          ₹{(order.totalPrice || 0).toFixed(2)}
         </td>
 
         {/* Status dropdown */}
@@ -119,7 +119,7 @@ function OrderRow({
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Order Items</p>
                 <div className="space-y-3">
-                  {order.items.map((item, i) => (
+                  {order.orderItems.map((item: any, i: number) => (
                     <div key={i} className="flex items-center gap-3">
                       <img
                         src={item.image}
