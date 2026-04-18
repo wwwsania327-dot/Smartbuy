@@ -10,7 +10,7 @@ export default function CategoriesGallery() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/categories');
+        const res = await fetch('/api/categories');
         if (res.ok) {
           const data = await res.json();
           setCategories(data);

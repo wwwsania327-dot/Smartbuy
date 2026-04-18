@@ -14,7 +14,7 @@ export default function AdminUsers() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/users');
+      const res = await fetch('/api/users');
       if (res.ok) {
         setUsers(await res.json());
       }
@@ -44,7 +44,7 @@ export default function AdminUsers() {
     if(!confirm(`Are you sure you want to ${action} this user?`)) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${id}/status`, {
+      const res = await fetch(`/api/users/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })

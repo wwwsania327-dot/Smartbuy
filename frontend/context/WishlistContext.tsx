@@ -24,7 +24,7 @@ type WishlistContextType = {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// API is handled via Next.js rewrites in next.config.ts for consistency and CORS
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<WishlistProduct[]>([]);
@@ -55,7 +55,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const syncWithDatabase = async (currentList: WishlistProduct[]) => {
     try {
       const productIds = currentList.map(p => p._id || (p as any).id).filter(Boolean);
-      const res = await fetch(`${API_BASE}/api/wishlist/${user?._id}/sync`, {
+      const res = await fetch(`/api/wishlist/${user?._id}/sync`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productIds }),
@@ -85,7 +85,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       
       if (user?._id) {
         const productId = product._id || (product as any).id;
-        fetch(`${API_BASE}/api/wishlist/${user._id}/remove`, {
+        fetch(`/api/wishlist/${user._id}/remove`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId }),
@@ -98,7 +98,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
       if (user?._id) {
         const productId = product._id || (product as any).id;
-        fetch(`${API_BASE}/api/wishlist/${user._id}/add`, {
+        fetch(`/api/wishlist/${user._id}/add`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId }),
