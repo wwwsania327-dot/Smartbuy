@@ -25,7 +25,7 @@ const addOrderItems = async (req, res) => {
       return res.status(400).json({ message: 'No order items' });
     } else {
       // Map frontend fields (quantity, id) to backend fields (qty, product)
-      const mappedItems = orderItems.map((item: any) => ({
+      const mappedItems = orderItems.map((item) => ({
         name: item.name,
         qty: item.quantity || item.qty,
         image: item.image,
