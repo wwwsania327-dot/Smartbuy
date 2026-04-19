@@ -16,24 +16,34 @@ const STATUS_BADGE: Record<OrderStatus, { label: string; cls: string }> = {
   Cancelled:        { label: "Cancelled",        cls: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400" },
 };
 
+import { fetchApi } from "../../lib/api";
+
 export default function AdminDashboard() {
   const [orders, setOrders]     = useState<Order[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
-    const loadData = () => {
+    const loadData = async () => {
       try {
-        const rawO = localStorage.getItem(ORDERS_KEY);
-        setOrders(rawO ? JSON.parse(rawO) : []);
-      } catch { setOrders([]); }
-      try {
+        setLoading(true);
+        // Load Orders from API
+        const orderRes = await fetchApi("/api/orders/all");
+        if (orderRes.ok) {
+          const orderData = await orderRes.json();
+          setOrders(orderData.map((o: any) => ({ ...o, id: o._id || o.id })));
+        }
+
+        // Load Products from localStorage (existing logic)
         const rawP = localStorage.getItem(PRODUCTS_KEY);
         setProducts(rawP ? JSON.parse(rawP) : []);
-      } catch { setProducts([]); }
+      } catch (err) {
+        console.error("Dashboard load error:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadData();
-    window.addEventListener("storage", loadData);
-    return () => window.removeEventListener("storage", loadData);
   }, []);
 
   // ── Live stats ──────────────────────────────────────────────────────────────

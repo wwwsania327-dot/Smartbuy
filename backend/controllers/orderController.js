@@ -109,11 +109,7 @@ const updateOrderToPaid = async (req, res) => {
 // @access  Private
 const getMyOrders = async (req, res) => {
   try {
-    // If auth middleware is working, use req.user._id
-    // For now, if req.user is missing, we return empty as we can't safely identify user without token
-    if (!req.user) {
-      return res.json([]);
-    }
+    if (!req.user) return res.json([]);
     const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
@@ -121,4 +117,37 @@ const getMyOrders = async (req, res) => {
   }
 };
 
-module.exports = { addOrderItems, getOrderById, updateOrderToPaid, getMyOrders };
+// @desc    Get all orders
+// @route   GET /api/orders/all
+// @access  Private/Admin
+const getOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({}).populate('user', 'id name email').sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error retrieving all orders' });
+  }
+};
+
+// @desc    Update order status
+// @route   PUT /api/orders/:id/status
+// @access  Private/Admin
+const updateOrderStatus = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+      order.status = req.body.status || order.status;
+      
+      const updatedOrder = await order.save();
+      console.log(`[OrderUpdate] Status of ${order._id} updated to: ${order.status}`);
+      res.json(updatedOrder);
+    } else {
+      res.status(404).json({ message: 'Order not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error updating order status' });
+  }
+};
+
+module.exports = { addOrderItems, getOrderById, updateOrderToPaid, getMyOrders, getOrders, updateOrderStatus };

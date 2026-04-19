@@ -190,34 +190,56 @@ function OrderRow({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
 
-  // Load orders from localStorage
-  useEffect(() => {
-    const load = () => {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        setOrders(raw ? JSON.parse(raw) : []);
-      } catch {
-        setOrders([]);
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetchApi("/api/orders/all");
+      if (res.ok) {
+        const data = await res.json();
+        // Ensure every order has a client-side 'id' field mapped from MongoDB '_id'
+        const mappedData = data.map((o: any) => ({ ...o, id: o._id || o.id }));
+        setOrders(mappedData);
+      } else {
+        setError("Failed to fetch orders from server");
       }
-    };
-    load();
-    // Auto-refresh when any tab places an order
-    window.addEventListener("storage", load);
-    return () => window.removeEventListener("storage", load);
+    } catch (err) {
+      console.error("Load orders error:", err);
+      setError("An unexpected error occurred while loading orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrders();
   }, []);
 
-  // Status change: update localStorage + state
-  function handleStatusChange(orderId: string, newStatus: OrderStatus) {
-    setOrders((prev) => {
-      const updated = prev.map((o) =>
-        o.id === orderId ? { ...o, status: newStatus } : o
-      );
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
+  async function handleStatusChange(orderId: string, newStatus: OrderStatus) {
+    try {
+      const dbId = orders.find(o => o.id === orderId)?._id || orderId;
+      const res = await fetchApi(`/api/orders/${dbId}/status`, {
+        method: "PUT",
+        body: { status: newStatus },
+      });
+
+      if (res.ok) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+        );
+      } else {
+        const errData = await res.json();
+        alert(`Error: ${errData.message || "Failed to update status"}`);
+      }
+    } catch (err) {
+      console.error("Status update error:", err);
+      alert("Failed to update status on server");
+    }
   }
 
   // Filtered list
