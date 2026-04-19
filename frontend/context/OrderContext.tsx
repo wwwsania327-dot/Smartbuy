@@ -47,6 +47,8 @@ interface OrderContextType {
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
+import { fetchApi } from "@/lib/api";
+
 const ADDRESS_KEY = "smartbuy_saved_address";
 
 export function OrderProvider({ children }: { children: React.ReactNode }) {
@@ -55,14 +57,10 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
   const fetchOrders = async () => {
-    if (!user?.token) return;
+    if (!user) return;
     try {
       setLoading(true);
-      const res = await fetch("/api/orders", {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      const res = await fetchApi("/api/orders");
       if (res.ok) {
         const data = await res.json();
         const mappedData = data.map((o: any) => ({ ...o, id: o._id || o.id }));
@@ -95,20 +93,16 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const placeOrder = async (orderData: any): Promise<Order | null> => {
-    if (!user?.token) {
-      console.warn('[OrderContext] Attempted to place order without user token');
+    if (!user) {
+      console.warn('[OrderContext] Attempted to place order without user');
       return null;
     }
     
     try {
       setLoading(true);
-      const res = await fetch("/api/orders", {
+      const res = await fetchApi("/api/orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(orderData),
+        body: orderData,
       });
 
       if (res.ok) {
@@ -132,6 +126,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   };
+
 
   const getSavedAddress = (): OrderAddress | null => {
     try {

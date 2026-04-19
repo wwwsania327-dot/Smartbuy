@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+import { fetchApi } from '../../../lib/api';
+
 export default function CategoriesGallery() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ export default function CategoriesGallery() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('/api/categories');
+        const res = await fetchApi('/api/categories');
         if (res.ok) {
           const data = await res.json();
           setCategories(data);
@@ -24,6 +26,7 @@ export default function CategoriesGallery() {
 
     fetchCategories();
   }, []);
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">

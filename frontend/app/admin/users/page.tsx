@@ -5,6 +5,8 @@ import { Search, ShieldAlert, ShieldCheck, User as UserIcon } from 'lucide-react
 import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 
+import { fetchApi } from '@/lib/api';
+
 export default function AdminUsers() {
   const [users, setUsers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,7 +16,7 @@ export default function AdminUsers() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users');
+      const res = await fetchApi('/api/users');
       if (res.ok) {
         setUsers(await res.json());
       }
@@ -44,10 +46,9 @@ export default function AdminUsers() {
     if(!confirm(`Are you sure you want to ${action} this user?`)) return;
 
     try {
-      const res = await fetch(`/api/users/${id}/status`, {
+      const res = await fetchApi(`/api/users/${id}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: { status: newStatus }
       });
       
       if(res.ok) {
@@ -62,6 +63,7 @@ export default function AdminUsers() {
       alert("Error updating user status.");
     }
   };
+
 
   const filteredUsers = users.filter(u => 
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 

@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
 
+import { fetchApi } from "@/lib/api";
+
 // Generalized Product interface that works for UI
 export type WishlistProduct = {
   _id: string;
@@ -55,10 +57,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const syncWithDatabase = async (currentList: WishlistProduct[]) => {
     try {
       const productIds = currentList.map(p => p._id || (p as any).id).filter(Boolean);
-      const res = await fetch(`/api/wishlist/${user?._id}/sync`, {
+      const res = await fetchApi(`/api/wishlist/${user?._id}/sync`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productIds }),
+        body: { productIds },
       });
       if (res.ok) {
         const fullWishlist = await res.json();
@@ -85,10 +86,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       
       if (user?._id) {
         const productId = product._id || (product as any).id;
-        fetch(`/api/wishlist/${user._id}/remove`, {
+        fetchApi(`/api/wishlist/${user._id}/remove`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId }),
+          body: { productId },
         }).catch(() => console.log("Failed to remove from database (Backend might be offline)"));
       }
     } else {
@@ -98,16 +98,16 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
       if (user?._id) {
         const productId = product._id || (product as any).id;
-        fetch(`/api/wishlist/${user._id}/add`, {
+        fetchApi(`/api/wishlist/${user._id}/add`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId }),
+          body: { productId },
         }).catch(() => console.log("Failed to add to database (Backend might be offline)"));
       }
     }
 
     localStorage.setItem("smartbuy_wishlist", JSON.stringify(updatedList));
   };
+
 
   return (
     <WishlistContext.Provider value={{ wishlist, toggleWishlist, isWishlisted, loading }}>

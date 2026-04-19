@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, X, Image as ImageIcon } from 'lucide-react';
+import { fetchApi } from '@/lib/api';
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,7 +19,7 @@ export default function AdminCategories() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('/api/categories');
+      const res = await fetchApi('/api/categories');
       if (res.ok) {
         const data = await res.json();
         setCategories(data);
@@ -51,7 +52,7 @@ export default function AdminCategories() {
   const deleteCategory = async (id: string) => {
     if(!confirm("Are you sure you want to delete this category?")) return;
     try {
-      const res = await fetch(`/api/categories/${id}`, {
+      const res = await fetchApi(`/api/categories/${id}`, {
         method: 'DELETE'
       });
       if(res.ok) fetchCategories();
@@ -69,14 +70,13 @@ export default function AdminCategories() {
       
       const method = editingId ? 'PUT' : 'POST';
       
-      const res = await fetch(url, {
+      const res = await fetchApi(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           name: formData.name,
           description: formData.description,
           image: { url: formData.imageUrl }
-        })
+        }
       });
       
       if(res.ok) {
@@ -88,9 +88,10 @@ export default function AdminCategories() {
       }
     } catch(err) {
       console.error(err);
-      alert("Failed to save category. Backend unreachable.");
+      alert("Failed to save category.");
     }
   };
+
 
   const filteredCategories = categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
 

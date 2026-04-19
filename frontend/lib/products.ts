@@ -49,13 +49,15 @@ export function normalizeProduct(p: any): Product {
   };
 }
 
+import { fetchApi } from './api';
+
 /**
  * Fetch all products from the backend (via /api/products proxy).
  * Returns a flat array of normalised Product objects.
  */
 export async function fetchMergedProducts(): Promise<Product[]> {
   try {
-    const res = await fetch('/api/products', { cache: 'no-store' });
+    const res = await fetchApi('/api/products');
     if (!res.ok) throw new Error(`/api/products returned ${res.status}`);
 
     const data = await res.json();
@@ -77,8 +79,7 @@ export async function fetchMergedProducts(): Promise<Product[]> {
  */
 export async function fetchProductById(productId: string): Promise<Product | null> {
   try {
-    // Try the direct single-product endpoint first (more efficient)
-    const res = await fetch(`/api/products/${productId}`, { cache: 'no-store' });
+    const res = await fetchApi(`/api/products/${productId}`);
 
     if (res.ok) {
       const data = await res.json();
@@ -91,6 +92,7 @@ export async function fetchProductById(productId: string): Promise<Product | nul
     console.warn(`[SmartBuy] fetchProductById(${productId}) → direct fetch failed (${res.status}), searching list...`);
     const all = await fetchMergedProducts();
     const found = all.find(p => p.id === productId || p._id === productId) ?? null;
+
 
     if (found) {
       console.log(`[SmartBuy] fetchProductById(${productId}) found in list → "${found.name}"`);

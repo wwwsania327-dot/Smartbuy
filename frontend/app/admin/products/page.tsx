@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, X, Image as ImageIcon, Filter } from 'lucide-react';
+import { fetchApi } from '@/lib/api';
 import { normalizeProduct } from '@/lib/products';
 
 export default function AdminProducts() {
@@ -26,7 +27,7 @@ export default function AdminProducts() {
   const fetchData = async () => {
     try {
       // 1. Fetch products from real backend
-      const prodRes = await fetch('/api/products');
+      const prodRes = await fetchApi('/api/products');
       if (prodRes.ok) {
         const data = await prodRes.json();
         const rawList = data.products || (Array.isArray(data) ? data : []);
@@ -45,13 +46,12 @@ export default function AdminProducts() {
       }
 
       // 2. Fetch categories from real backend
-      const catRes = await fetch('/api/categories');
+      const catRes = await fetchApi('/api/categories');
       if (catRes.ok) {
         const catData = await catRes.json();
         setCategories(catData);
       } else {
         console.error("Failed to fetch real categories from backend");
-        // Fallback to avoid empty select if API fails but show error
         setCategories([]);
       }
     } catch (err) {
@@ -94,7 +94,7 @@ export default function AdminProducts() {
   const deleteProduct = async (id: string) => {
     if(!confirm("Are you sure you want to delete this product?")) return;
     try {
-      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const res = await fetchApi(`/api/products/${id}`, { method: 'DELETE' });
       if (res.ok) {
         alert("Product deleted successfully!");
         fetchData();
@@ -119,7 +119,7 @@ export default function AdminProducts() {
       const discountPct = Number(formData.discount) || 0;
       const origPrice = Number(formData.price);
 
-      // Backend payload (matches productController schema)
+      // Backend payload
       const payload = {
         name: formData.name,
         description: formData.description || 'No description provided',
@@ -128,21 +128,19 @@ export default function AdminProducts() {
         stock: Number(formData.stock),
         category: formData.category,
         images: formData.imageUrl ? [{ url: formData.imageUrl }] : [],
-        image: formData.imageUrl,  // direct image field too
+        image: formData.imageUrl,
       };
 
       let res: Response;
       if (editingId) {
-        res = await fetch(`/api/products/${editingId}`, {
+        res = await fetchApi(`/api/products/${editingId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: payload,
         });
       } else {
-        res = await fetch('/api/products', {
+        res = await fetchApi('/api/products', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: payload,
         });
       }
 
@@ -152,13 +150,14 @@ export default function AdminProducts() {
         fetchData();
       } else {
         const err = await res.json();
-        alert(`Failed to save: ${err.message || 'Unknown error'}. Is the backend running?`);
+        alert(`Failed to save: ${err.message || 'Unknown error'}`);
       }
     } catch(err) {
       console.error(err);
-      alert("Failed to save product. Make sure the backend server is running on port 5000.");
+      alert("Failed to save product.");
     }
   };
+
 
   // Filtering
   const filteredProducts = products.filter(p => {

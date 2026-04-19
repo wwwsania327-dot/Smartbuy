@@ -7,6 +7,8 @@ import { useCart } from '../../../../context/CartContext';
 import ProductCard from '../../../../components/ProductCard';
 import { normalizeProduct } from '../../../../lib/products';
 
+import { fetchApi } from '../../../../lib/api';
+
 export default function CategoryProducts() {
   const { slug } = useParams();
   const [products, setProducts] = useState<any[]>([]);
@@ -17,11 +19,12 @@ export default function CategoryProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`/api/products/category/${slug}`);
+        const res = await fetchApi(`/api/products/category/${slug}`);
         if (res.ok) {
           const data = await res.json();
           // Backend returns { products: [] }
           const rawProducts = data.products || (Array.isArray(data) ? data : []);
+
           
           const normalized = rawProducts.map((p: any) => normalizeProduct(p));
           

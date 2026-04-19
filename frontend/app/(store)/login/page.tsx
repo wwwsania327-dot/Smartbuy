@@ -5,6 +5,7 @@ import { ArrowRight, Mail, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-re
 import Link from 'next/link';
 import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { fetchApi } from '../../../lib/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -49,10 +50,9 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`/api/auth/send-otp`, {
+      const res = await fetchApi(`/api/auth/send-otp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: { email },
       });
 
       const data = await res.json();
@@ -76,13 +76,13 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`/api/auth/verify-otp`, {
+      const res = await fetchApi(`/api/auth/verify-otp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp }),
+        body: { email, otp },
       });
 
       const data = await res.json();
+
 
       if (!res.ok) throw new Error(data.message || 'Invalid OTP');
 
