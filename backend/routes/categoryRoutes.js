@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { getCategories, createCategory, getCategoryById, updateCategory, deleteCategory, healCategoryLinks } = require('../controllers/categoryController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 // POST /api/categories/heal - Heal product-category links (Admin only)

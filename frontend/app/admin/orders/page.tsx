@@ -6,6 +6,7 @@ import {
   Package, CheckCircle2, XCircle, Truck, Clock,
   Search, ChevronDown, MapPin, ChevronRight,
 } from "lucide-react";
+import { fetchApi } from "@/lib/api";
 
 const STORAGE_KEY = "smartbuy_orders";
 
