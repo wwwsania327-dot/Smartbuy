@@ -73,7 +73,8 @@ const getOrderById = async (req, res) => {
       res.status(404).json({ message: 'Order not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server Error finding order' });
+    console.error('[GetOrderById ERROR] Full stack trace:', error);
+    res.status(500).json({ message: 'Server Error finding order', error: error.message });
   }
 };
 
@@ -122,10 +123,11 @@ const getMyOrders = async (req, res) => {
 // @access  Private/Admin
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({}).populate('user', 'id name email').sort({ createdAt: -1 });
+    const orders = await Order.find({}).populate('user', 'name email').sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Server Error retrieving all orders' });
+    console.error('[GetOrders ERROR] Full stack trace:', error);
+    res.status(500).json({ message: 'Server Error retrieving all orders', error: error.message });
   }
 };
 

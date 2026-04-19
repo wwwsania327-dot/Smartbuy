@@ -8,8 +8,10 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Pre-load all models so Mongoose registers their schemas before any populate() runs
+require('./models/User');
 require('./models/Category');
 require('./models/Product');
+require('./models/Order');
 
 // Route imports
 const authRoutes = require('./routes/authRoutes');
