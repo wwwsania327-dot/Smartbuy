@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { getUsers, updateUserStatus } = require('../controllers/userController');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 // GET /api/users - Fetch all users
-// TODO: Secure with Admin Middleware once JWT checks are established
-router.get('/', getUsers);
+router.get('/', protect, admin, getUsers);
 
 // PUT /api/users/:id/status - Block or Unblock user
-router.put('/:id/status', updateUserStatus);
+router.put('/:id/status', protect, admin, updateUserStatus);
 
 module.exports = router;

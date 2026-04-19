@@ -4,14 +4,17 @@ import Link from 'next/link';
 import { ShoppingCart, User, Search, Menu, Heart } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import CartDrawer from './CartDrawer';
 
 export default function Navbar() {
   const { wishlist } = useWishlist();
   const { cart, toggleCart } = useCart();
+  const { user } = useAuth();
   
-  const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const cartItemCount = cart.reduce((acc: number, item: any) => acc + item.quantity, 0);
+  const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
 
   return (
     <nav className="glass sticky top-0 z-50 w-full border-b border-[var(--color-border)] shadow-premium transition-all duration-300">
@@ -55,6 +58,16 @@ export default function Navbar() {
               <ThemeToggle />
             </div>
             
+            {isAdmin && (
+              <Link 
+                href="/admin" 
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-orange-500/20 hover:scale-105 active:scale-95 transition-all duration-200 border border-white/20"
+              >
+                <span>👑</span>
+                <span>Admin</span>
+              </Link>
+            )}
+
             <button className="p-2.5 rounded-xl text-[var(--color-foreground)] hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-[var(--color-primary)] transition-all duration-200">
               <User className="w-6 h-6" />
             </button>
@@ -80,7 +93,7 @@ export default function Navbar() {
                   </span>
                 )}
               </div>
-              <span className="hidden lg:block text-sm">₹{cart.reduce((s, i) => s + (i.product as any).price * i.quantity, 0).toFixed(0)}</span>
+              <span className="hidden lg:block text-sm">₹{cart.reduce((s: number, i: any) => s + (i.product as any).price * i.quantity, 0).toFixed(0)}</span>
             </button>
 
             {/* Mobile Menu Button */}

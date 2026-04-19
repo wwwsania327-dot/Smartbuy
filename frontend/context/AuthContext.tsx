@@ -8,7 +8,7 @@ interface UserData {
   _id: string;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'superadmin';
   status?: string;
   token?: string;
 }
@@ -70,14 +70,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.replace('/login');
         return;
       }
-      if (user.role !== 'admin') {
+      // Allow both admin and superadmin
+      const isAdminFlag = user.role === 'admin' || user.role === 'superadmin';
+      if (!isAdminFlag) {
+        console.warn(`[AuthGuard] Unauthorized access attempt to ${pathname} by ${user.role}`);
         router.replace('/');
         return;
       }
     }
 
     if (user && (pathname === '/login' || pathname === '/register')) {
-      const dest = user.role === 'admin' ? '/admin' : '/';
+      const isAdminFlag = user.role === 'admin' || user.role === 'superadmin';
+      const dest = isAdminFlag ? '/admin' : '/';
       router.replace(dest);
     }
   }, [user, loading, pathname, router]);

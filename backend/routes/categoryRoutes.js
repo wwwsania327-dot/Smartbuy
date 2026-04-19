@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getCategories, createCategory, getCategoryById, updateCategory, deleteCategory, healCategoryLinks } = require('../controllers/categoryController');
+const { protect, admin } = require('../middleware/authMiddleware');
 
-// POST /api/categories/heal - Heal product-category links
-router.post('/heal', healCategoryLinks);
+// POST /api/categories/heal - Heal product-category links (Admin only)
+router.post('/heal', protect, admin, healCategoryLinks);
 
 // GET /api/categories - Fetch all categories
 router.get('/', getCategories);
@@ -12,13 +12,12 @@ router.get('/', getCategories);
 router.get('/:id', getCategoryById);
 
 // POST /api/categories - Create a category (Admin only)
-// TODO: Add admin middleware
-router.post('/', createCategory);
+router.post('/', protect, admin, createCategory);
 
 // PUT /api/categories/:id - Update a category (Admin only)
-router.put('/:id', updateCategory);
+router.put('/:id', protect, admin, updateCategory);
 
 // DELETE /api/categories/:id - Delete a category (Admin only)
-router.delete('/:id', deleteCategory);
+router.delete('/:id', protect, admin, deleteCategory);
 
 module.exports = router;
