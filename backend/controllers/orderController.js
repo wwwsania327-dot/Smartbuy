@@ -24,8 +24,17 @@ const addOrderItems = async (req, res) => {
     if (orderItems && orderItems.length === 0) {
       return res.status(400).json({ message: 'No order items' });
     } else {
+      // Map frontend fields (quantity, id) to backend fields (qty, product)
+      const mappedItems = orderItems.map((item: any) => ({
+        name: item.name,
+        qty: item.quantity || item.qty,
+        image: item.image,
+        price: item.price,
+        product: item.product || item.id
+      }));
+
       const order = new Order({
-        orderItems,
+        orderItems: mappedItems,
         user: orderUser,
         shippingAddress,
         paymentMethod,
@@ -118,16 +127,21 @@ const getMyOrders = async (req, res) => {
   }
 };
 
-// @desc    Get all orders
-// @route   GET /api/orders/all
-// @access  Private/Admin
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({}).populate('user', 'name email').sort({ createdAt: -1 });
+    // Exact root cause fix: Ensure 'User' model is registered and populate is using valid fields
+    const orders = await Order.find({})
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 });
+    
     res.json(orders);
   } catch (error) {
-    console.error('[GetOrders ERROR] Full stack trace:', error);
-    res.status(500).json({ message: 'Server Error retrieving all orders', error: error.message });
+    console.error('[GetOrders CRITICAL ERROR]:', error);
+    res.status(500).json({ 
+      message: 'Server Error retrieving all orders', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
