@@ -24,8 +24,8 @@ export default function MobileBottomNav() {
 
   return (
     <div className="fixed z-50 transition-all duration-500
-      bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md
-      md:bottom-0 md:left-0 md:translate-x-0 md:w-full md:max-w-none md:bg-white/90 md:dark:bg-gray-900/90 md:backdrop-blur-xl md:border-t md:border-gray-200 md:dark:border-white/5 md:shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+      bottom-0 left-0 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]
+      md:bg-white/90 md:dark:bg-gray-900/90 md:backdrop-blur-xl md:border-t md:border-gray-200 md:dark:border-white/5 md:shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
       {/* Floating Cart Button */}
       <AnimatePresence>
         {cartCount > 0 && (
@@ -33,7 +33,7 @@ export default function MobileBottomNav() {
             initial={{ scale: 0, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0, opacity: 0, y: 20 }}
-            className="absolute -top-16 right-0 md:right-6 lg:right-10"
+            className="absolute -top-16 right-4 md:right-6 lg:right-10"
           >
             <Link
               href="/cart"
@@ -49,26 +49,24 @@ export default function MobileBottomNav() {
       </AnimatePresence>
 
       {/* Main Nav Bar */}
-      <nav className="transition-all duration-300
-        glass rounded-[2rem] px-4 py-3 border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
-        md:rounded-none md:shadow-none md:bg-transparent md:border-none md:px-0 md:py-0">
-        <div className="max-w-7xl mx-auto px-4 md:px-12">
-          <ul className="flex justify-between items-center relative md:h-20">
+      <nav className="transition-all duration-300 h-[60px] py-[6px] md:h-20 md:py-0">
+        <div className="max-w-7xl mx-auto px-2 md:px-12 h-full">
+          <ul className="flex justify-between items-center relative h-full">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
               (item.href !== '/' && pathname.startsWith(item.href));
 
             return (
-              <li key={item.name} className="relative z-10 flex-1">
+              <li key={item.name} className="relative z-10 flex-1 h-full">
                 <Link
                   href={item.href}
-                  className="flex flex-col items-center justify-center py-1 group transition-all duration-300 md:hover:bg-emerald-500/5 md:dark:hover:bg-emerald-500/10 md:rounded-2xl"
+                  className="flex flex-col items-center justify-center h-full w-full group transition-all duration-300 md:hover:bg-emerald-500/5 md:dark:hover:bg-emerald-500/10 md:rounded-2xl"
                 >
                   <motion.div
                     whileTap={{ scale: 0.9 }}
                     className={`
-                      relative p-2 rounded-xl transition-colors duration-300
+                      relative p-1 rounded-[10px] transition-colors duration-300 flex items-center justify-center
                       ${isActive ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'}
                     `}
                   >
@@ -85,11 +83,11 @@ export default function MobileBottomNav() {
                       fill={isActive && item.name === 'Wishlist' ? 'currentColor' : 'none'}
                     />
                     {item.badge > 0 && (
-                      <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900" />
+                      <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900" />
                     )}
                   </motion.div>
                   <span className={`
-                    text-[10px] font-bold mt-1 tracking-wider transition-colors duration-300
+                    text-[10px] font-bold mt-0.5 tracking-wider transition-colors duration-300 leading-tight
                     ${isActive ? 'text-emerald-600 dark:text-emerald-400 opacity-100' : 'text-gray-400 dark:text-gray-500 opacity-60'}
                   `}>
                     {item.name}
