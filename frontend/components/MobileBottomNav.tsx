@@ -23,9 +23,8 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <div className="fixed z-50 transition-all duration-500
-      bottom-0 left-0 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]
-      md:bg-white/90 md:dark:bg-gray-900/90 md:backdrop-blur-xl md:border-t md:border-gray-200 md:dark:border-white/5 md:shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+    <div className="fixed z-50 transition-all duration-500 md:hidden
+      bottom-0 left-0 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
       {/* Floating Cart Button */}
       <AnimatePresence>
         {cartCount > 0 && (
