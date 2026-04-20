@@ -25,7 +25,7 @@ export default function StoreLayout({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="flex-grow flex flex-col pb-[60px] md:pb-0 mt-4"
+          className="flex-grow flex flex-col pb-20 mt-4"
         >
           <BackButton />
           {children}
