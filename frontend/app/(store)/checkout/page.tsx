@@ -40,6 +40,10 @@ export default function CheckoutPage() {
   // Load Razorpay Script
   const loadRazorpay = () => {
     return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.onload = () => resolve(true);
@@ -64,11 +68,13 @@ export default function CheckoutPage() {
       return;
     }
 
+    console.log("Placing order with method:", paymentMethod);
     setLoading(true);
     setError(null);
 
     try {
-      // 1. Create Order in Database (Always First)
+      // 1. Create Order in Database (Required for both flows to get dbOrderId)
+      console.log("Creating order in database...");
       const orderData = {
         orderItems: cart.map(item => ({
           name: item.product.name,
@@ -97,19 +103,31 @@ export default function CheckoutPage() {
 
       const createdOrder = await orderRes.json();
       const dbOrderId = createdOrder._id;
+      console.log("Order created successfully with ID:", dbOrderId);
 
-      // 2. Handle Flows
+      // 2. Branching Logic
       if (paymentMethod === 'COD') {
+        console.log("Processing COD order...");
         setShowSuccess(true);
         clearCart();
+        setLoading(false);
       } else {
         // ONLINE FLOW
-        const res = await loadRazorpay();
-        if (!res) {
-          throw new Error("Razorpay SDK failed to load");
+        console.log("Processing ONLINE order via Razorpay...");
+        
+        // Ensure Razorpay script is loaded
+        const isScriptLoaded = await loadRazorpay();
+        if (!isScriptLoaded) {
+          throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
         }
 
-        // Create Razorpay Order
+        // Safety check for window.Razorpay
+        if (!(window as any).Razorpay) {
+          throw new Error("Razorpay SDK not found on window object");
+        }
+
+        // Create Razorpay Order on Backend
+        console.log("Initiating Razorpay order creation...");
         const rzpOrderRes = await fetchApi('/api/payment/create-order', {
           method: 'POST',
           body: { amount: total, orderId: dbOrderId }
@@ -121,18 +139,19 @@ export default function CheckoutPage() {
         }
 
         const rzpOrder = await rzpOrderRes.json();
+        console.log("Razorpay order initiated:", rzpOrder.id);
 
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '', // Use the environment variable
           amount: rzpOrder.amount,
           currency: rzpOrder.currency,
           name: 'SmartBuy',
-          description: 'Payment for your order',
-          image: '/logo.png', // Replace with your logo
+          description: 'Payment for Order #' + dbOrderId.slice(-6),
+          image: '/logo.png',
           order_id: rzpOrder.id,
           handler: async (response: any) => {
+            console.log("Payment successful, verifying...");
             try {
-              // Verify Payment on Backend
               const verifyRes = await fetchApi('/api/payment/verify', {
                 method: 'POST',
                 body: {
@@ -142,13 +161,17 @@ export default function CheckoutPage() {
               });
 
               if (verifyRes.ok) {
+                console.log("Payment verified successfully");
                 setShowSuccess(true);
                 clearCart();
               } else {
                 setError("Payment verification failed. Please contact support.");
               }
             } catch (err: any) {
+              console.error("Verification error:", err);
               setError("An error occurred during verification.");
+            } finally {
+              setLoading(false);
             }
           },
           prefill: {
@@ -157,12 +180,12 @@ export default function CheckoutPage() {
             contact: formData.phone
           },
           theme: {
-            color: '#10b981' // emerald-500
+            color: '#10b981'
           },
           modal: {
             ondismiss: function() {
+              console.log("Razorpay checkout closed by user");
               setLoading(false);
-              // Order remains 'Pending' in DB
             }
           }
         };
@@ -173,9 +196,7 @@ export default function CheckoutPage() {
     } catch (err: any) {
       console.error("Checkout Error:", err);
       setError(err.message || "Something went wrong. Please try again.");
-    } finally {
-      // For COD we set success true, for online we wait for handler or dismiss
-      if (paymentMethod === 'COD') setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -313,14 +334,16 @@ export default function CheckoutPage() {
                   ? 'border-[var(--color-primary)] bg-emerald-50/30 dark:bg-emerald-900/10' 
                   : 'border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
-                onClick={() => setPaymentMethod('ONLINE')}
               >
                 <div className="flex items-center gap-3">
                   <input 
                     type="radio" 
                     name="payment" 
                     checked={paymentMethod === 'ONLINE'} 
-                    onChange={() => setPaymentMethod('ONLINE')}
+                    onChange={() => {
+                      setPaymentMethod('ONLINE');
+                      console.log("Selected payment method: ONLINE");
+                    }}
                     className="w-5 h-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" 
                   />
                   <div>
@@ -340,14 +363,16 @@ export default function CheckoutPage() {
                   ? 'border-[var(--color-primary)] bg-emerald-50/30 dark:bg-emerald-900/10' 
                   : 'border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
-                onClick={() => setPaymentMethod('COD')}
               >
                 <div className="flex items-center gap-3">
                   <input 
                     type="radio" 
                     name="payment" 
                     checked={paymentMethod === 'COD'} 
-                    onChange={() => setPaymentMethod('COD')}
+                    onChange={() => {
+                      setPaymentMethod('COD');
+                      console.log("Selected payment method: COD");
+                    }}
                     className="w-5 h-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" 
                   />
                   <div>
