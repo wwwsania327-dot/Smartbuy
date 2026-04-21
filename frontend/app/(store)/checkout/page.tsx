@@ -46,6 +46,7 @@ export default function CheckoutPage() {
       }
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
@@ -73,6 +74,27 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
+      if (paymentMethod === 'ONLINE') {
+        console.log("Loading Razorpay...");
+        const isScriptLoaded = await loadRazorpay();
+        
+        if (!isScriptLoaded) {
+          setLoading(false);
+          alert("Razorpay SDK failed to load");
+          return;
+        }
+
+        console.log("Razorpay loaded:", (window as any).Razorpay);
+        console.log("Razorpay key:", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
+
+        // Safety check for window.Razorpay
+        if (!(window as any).Razorpay) {
+          setLoading(false);
+          console.error("Razorpay not available");
+          return;
+        }
+      }
+
       // 1. Create Order in Database (Required for both flows to get dbOrderId)
       console.log("Creating order in database...");
       const orderData = {
@@ -115,17 +137,6 @@ export default function CheckoutPage() {
         // ONLINE FLOW
         console.log("Processing ONLINE order via Razorpay...");
         
-        // Ensure Razorpay script is loaded
-        const isScriptLoaded = await loadRazorpay();
-        if (!isScriptLoaded) {
-          throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
-        }
-
-        // Safety check for window.Razorpay
-        if (!(window as any).Razorpay) {
-          throw new Error("Razorpay SDK not found on window object");
-        }
-
         // Create Razorpay Order on Backend
         console.log("Initiating Razorpay order creation...");
         const rzpOrderRes = await fetchApi('/api/payment/create-order', {
