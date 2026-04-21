@@ -102,12 +102,25 @@ const verifyOtp = async (req, res) => {
       const adminCount = await User.countDocuments({ role: 'admin' });
       const role = adminCount === 0 ? 'admin' : 'user';
 
-      user = await User.create({
+      const userData = {
         email: emailLower,
         name: emailLower.split('@')[0],
         role
-      });
+      };
+
+      // Requirement: Do NOT include firebaseUid if it's null or undefined
+      if (req.body.firebaseUid) {
+        userData.firebaseUid = req.body.firebaseUid;
+      }
+
+      user = await User.create(userData);
+    } else {
+      // Update last login for existing user
+      user.lastLogin = Date.now();
+      await user.save();
     }
+
+    console.log("User found or created:", user.email);
 
     // Clean up used OTP
     await Otp.deleteOne({ email: emailLower });
