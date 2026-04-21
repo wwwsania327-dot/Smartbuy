@@ -64,3 +64,26 @@ export async function fetchApi(url: string, options: FetchOptions = {}) {
     throw error;
   }
 }
+
+/**
+ * User Account Management API Wrappers
+ */
+
+// Profile & Settings
+export const updateProfile = (data: { name?: string, email?: string }) => 
+  fetchApi('/api/users/profile', { method: 'PUT', body: data });
+
+export const updateSettings = (data: { darkMode?: boolean, notificationsEnabled?: boolean, language?: string }) => 
+  fetchApi('/api/users/settings', { method: 'PUT', body: data });
+
+// Addresses
+export const getAddresses = () => fetchApi('/api/auth/profile').then(res => res.json()).then(data => data.addresses || []);
+export const addAddress = (data: any) => fetchApi('/api/users/addresses', { method: 'POST', body: data });
+export const updateAddress = (id: string, data: any) => fetchApi(`/api/users/addresses/${id}`, { method: 'PUT', body: data });
+export const deleteAddress = (id: string) => fetchApi(`/api/users/addresses/${id}`, { method: 'DELETE' });
+export const setDefaultAddress = (id: string) => fetchApi(`/api/users/addresses/${id}/default`, { method: 'PUT' });
+
+// Notifications
+export const getNotifications = () => fetchApi('/api/users/notifications').then(res => res.json());
+export const markNotificationRead = (id: string) => fetchApi(`/api/users/notifications/${id}/read`, { method: 'PUT' });
+export const clearNotifications = () => fetchApi('/api/users/notifications', { method: 'DELETE' });

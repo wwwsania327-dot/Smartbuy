@@ -12,6 +12,7 @@ import { AuthProvider } from '../context/AuthContext';
 import { ToastProvider } from '../context/ToastContext';
 import { WishlistProvider } from '../context/WishlistContext';
 import { OrderProvider } from '../context/OrderContext';
+import { SearchProvider } from '../context/SearchContext';
 
 export default function RootLayout({
   children,
@@ -34,10 +35,12 @@ export default function RootLayout({
             <AuthProvider>
               <WishlistProvider>
                 <OrderProvider>
-                  <SplashScreen />
-                  <div className="relative z-10 flex-grow flex flex-col">
-                    {children}
-                  </div>
+                  <SearchProvider>
+                    <SplashScreen />
+                    <div className="relative z-10 flex-grow flex flex-col">
+                      {children}
+                    </div>
+                  </SearchProvider>
                 </OrderProvider>
               </WishlistProvider>
             </AuthProvider>

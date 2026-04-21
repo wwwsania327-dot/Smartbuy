@@ -5,13 +5,14 @@ import { Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import ProductCard, { ProductData } from '@/components/ProductCard';
 import { fetchMergedProducts, Product } from '@/lib/products';
+import { useSearch } from '@/context/SearchContext';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Filtering & Sorting State
-  const [searchTerm, setSearchTerm] = useState('');
+  const { searchQuery, setSearchQuery } = useSearch();
   const [category, setCategory] = useState('All');
   const [sortOption, setSortOption] = useState('default');
   
@@ -49,7 +50,7 @@ export default function ProductsPage() {
   // Apply filters and sort
   let filteredProducts = products.filter((p) => {
     const pCatName = typeof p.category === 'object' ? (p.category as any)?.name : p.category;
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = category === 'All' || pCatName === category;
     return matchesSearch && matchesCategory;
   });
@@ -77,8 +78,8 @@ export default function ProductsPage() {
             <input 
               type="text" 
               placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
             <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />

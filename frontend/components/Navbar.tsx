@@ -6,12 +6,14 @@ import { ThemeToggle } from './ThemeToggle';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useSearch } from '../context/SearchContext';
 import CartDrawer from './CartDrawer';
 
 export default function Navbar() {
   const { wishlist } = useWishlist();
   const { cart, toggleCart } = useCart();
   const { user } = useAuth();
+  const { searchQuery, setSearchQuery } = useSearch();
   
   const cartItemCount = cart.reduce((acc: number, item: any) => acc + item.quantity, 0);
   const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
@@ -44,6 +46,8 @@ export default function Navbar() {
               <input 
                 type="text" 
                 placeholder="Search for fresh groceries..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[var(--color-card)] border border-[var(--color-border)] text-sm rounded-full pl-5 pr-12 py-3.5 outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all shadow-sm group-hover:shadow-md relative z-10"
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-[var(--color-primary)] p-1.5 rounded-full text-white shadow-lg shadow-green-500/20">
@@ -68,9 +72,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            <button className="p-2.5 rounded-xl text-[var(--color-foreground)] hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-[var(--color-primary)] transition-all duration-200">
-              <User className="w-6 h-6" />
-            </button>
 
             <Link href="/wishlist" className="p-2.5 rounded-xl text-[var(--color-foreground)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-500 transition-all duration-200 relative">
               <Heart className="w-6 h-6" />

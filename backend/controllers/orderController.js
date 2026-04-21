@@ -1,4 +1,23 @@
 const Order = require('../models/Order');
+const User = require('../models/User');
+
+// Helper to add notification to user
+const pushNotification = async (userId, type, title, message) => {
+  try {
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        notifications: {
+          type,
+          title,
+          message,
+          createdAt: new Date()
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Notification Error:', err);
+  }
+};
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -43,6 +62,15 @@ exports.addOrderItems = async (req, res) => {
       });
 
       const createdOrder = await order.save();
+
+      // Push notification for order placed
+      await pushNotification(
+        orderUser,
+        'ORDER_PLACED',
+        'Order Placed Successfully',
+        `Your order #${createdOrder._id.toString().slice(-6)} has been placed and is being processed.`
+      );
+
       res.status(201).json(createdOrder);
     }
   } catch (error) {
@@ -129,6 +157,27 @@ exports.updateOrderStatus = async (req, res) => {
     if (order) {
       order.status = req.body.status || order.status;
       const updatedOrder = await order.save();
+
+      // Notification for status change
+      let title = 'Order Update';
+      let message = `Your order #${updatedOrder._id.toString().slice(-6)} status is now: ${updatedOrder.status}`;
+      
+      if (updatedOrder.status === 'Shipped') {
+        title = '🚀 Order Shipped';
+        message = `Good news! Your order #${updatedOrder._id.toString().slice(-6)} has been shipped.`;
+      } else if (updatedOrder.status === 'Out for Delivery') {
+        title = '🛵 Out for Delivery';
+        message = `Your order #${updatedOrder._id.toString().slice(-6)} is out for delivery and will reach you soon.`;
+      } else if (updatedOrder.status === 'Delivered') {
+        title = '✅ Order Delivered';
+        message = `Your order #${updatedOrder._id.toString().slice(-6)} has been successfully delivered. Enjoy!`;
+      } else if (updatedOrder.status === 'Cancelled') {
+        title = '❌ Order Cancelled';
+        message = `Your order #${updatedOrder._id.toString().slice(-6)} has been cancelled.`;
+      }
+
+      await pushNotification(updatedOrder.user, 'ORDER_UPDATE', title, message);
+
       res.json(updatedOrder);
     } else {
       res.status(404).json({ message: 'Order not found' });
