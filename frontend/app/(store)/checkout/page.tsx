@@ -23,7 +23,7 @@ export default function CheckoutPage() {
     phone: '',
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'ONLINE'>('COD');
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'ONLINE' | ''>('');
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,12 +69,20 @@ export default function CheckoutPage() {
       return;
     }
 
-    console.log("Placing order with method:", paymentMethod);
+    console.log("FINAL METHOD:", paymentMethod);
+
+    if (!paymentMethod) {
+      alert("Please select a payment method");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       if (paymentMethod === 'ONLINE') {
+        console.log("ONLINE FLOW START");
         console.log("Loading Razorpay...");
         const isScriptLoaded = await loadRazorpay();
         
@@ -129,6 +137,7 @@ export default function CheckoutPage() {
 
       // 2. Branching Logic
       if (paymentMethod === 'COD') {
+        console.log("COD FLOW START");
         console.log("Processing COD order...");
         setShowSuccess(true);
         clearCart();
@@ -349,11 +358,12 @@ export default function CheckoutPage() {
                 <div className="flex items-center gap-3">
                   <input 
                     type="radio" 
-                    name="payment" 
+                    name="paymentMethod" 
+                    value="ONLINE"
                     checked={paymentMethod === 'ONLINE'} 
-                    onChange={() => {
-                      setPaymentMethod('ONLINE');
-                      console.log("Selected payment method: ONLINE");
+                    onChange={(e) => {
+                      setPaymentMethod(e.target.value as 'ONLINE');
+                      console.log("Selected:", e.target.value);
                     }}
                     className="w-5 h-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" 
                   />
@@ -378,11 +388,12 @@ export default function CheckoutPage() {
                 <div className="flex items-center gap-3">
                   <input 
                     type="radio" 
-                    name="payment" 
+                    name="paymentMethod" 
+                    value="COD"
                     checked={paymentMethod === 'COD'} 
-                    onChange={() => {
-                      setPaymentMethod('COD');
-                      console.log("Selected payment method: COD");
+                    onChange={(e) => {
+                      setPaymentMethod(e.target.value as 'COD');
+                      console.log("Selected:", e.target.value);
                     }}
                     className="w-5 h-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" 
                   />
