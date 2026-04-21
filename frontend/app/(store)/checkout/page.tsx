@@ -23,7 +23,7 @@ export default function CheckoutPage() {
     phone: '',
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'ONLINE' | ''>('');
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +69,7 @@ export default function CheckoutPage() {
       return;
     }
 
+    console.log("Selected payment:", paymentMethod);
     console.log("FINAL METHOD:", paymentMethod);
 
     if (!paymentMethod) {
