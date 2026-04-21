@@ -66,6 +66,7 @@ const sendOtp = async (req, res) => {
 // @route   POST /api/auth/verify-otp
 // @access  Public
 const verifyOtp = async (req, res) => {
+  console.log("REQ BODY:", req.body);
   try {
     const { email, otp } = req.body;
     
@@ -75,15 +76,22 @@ const verifyOtp = async (req, res) => {
 
     const emailLower = email.toLowerCase();
     
-    // Find OTP record
+    // 1. Ensure OTP exists in Otp collection
     const otpRecord = await Otp.findOne({ email: emailLower });
     
     if (!otpRecord) {
-      return res.status(400).json({ message: 'OTP expired or not found. Please request a new one.' });
+      return res.status(400).json({ message: 'OTP not found' });
+    }
+
+    // 2. Ensure OTP not expired (Manual check for 5 mins)
+    const expiryTime = 5 * 60 * 1000; // 5 minutes in ms
+    if (Date.now() - new Date(otpRecord.createdAt).getTime() > expiryTime) {
+      return res.status(400).json({ message: 'OTP expired' });
     }
     
+    // 3. Ensure OTP comparison
     if (otpRecord.otp !== otp) {
-      return res.status(400).json({ message: 'Invalid OTP format or incorrect code.' });
+      return res.status(400).json({ message: 'Invalid OTP' });
     }
 
     // OTP is valid. Now ensure User exists.
@@ -121,8 +129,8 @@ const verifyOtp = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Verify OTP error:', error);
-    res.status(500).json({ message: 'Server error during verification' });
+    console.error("OTP VERIFY ERROR:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 

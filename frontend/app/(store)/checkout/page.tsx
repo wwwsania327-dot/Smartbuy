@@ -70,11 +70,10 @@ export default function CheckoutPage() {
     }
 
     console.log("Selected payment:", paymentMethod);
-    console.log("FINAL METHOD:", paymentMethod);
+    console.log("Sending payment method:", paymentMethod);
 
     if (!paymentMethod) {
       alert("Please select a payment method");
-      setLoading(false);
       return;
     }
 
@@ -82,29 +81,7 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
-      if (paymentMethod === 'ONLINE') {
-        console.log("ONLINE FLOW START");
-        console.log("Loading Razorpay...");
-        const isScriptLoaded = await loadRazorpay();
-        
-        if (!isScriptLoaded) {
-          setLoading(false);
-          alert("Razorpay SDK failed to load");
-          return;
-        }
-
-        console.log("Razorpay loaded:", (window as any).Razorpay);
-        console.log("Razorpay key:", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
-
-        // Safety check for window.Razorpay
-        if (!(window as any).Razorpay) {
-          setLoading(false);
-          console.error("Razorpay not available");
-          return;
-        }
-      }
-
-      // 1. Create Order in Database (Required for both flows to get dbOrderId)
+      // 1. ALWAYS Create Order in Database first
       console.log("Creating order in database...");
       const orderData = {
         orderItems: cart.map(item => ({
@@ -115,7 +92,7 @@ export default function CheckoutPage() {
           product: item.product.id
         })),
         shippingAddress: formData,
-        paymentMethod: paymentMethod,
+        paymentMethod: paymentMethod, // Using state value
         itemsPrice: cartTotal,
         taxPrice: taxes,
         shippingPrice: 0,
@@ -138,17 +115,23 @@ export default function CheckoutPage() {
 
       // 2. Branching Logic
       if (paymentMethod === 'COD') {
-        console.log("COD FLOW START");
-        console.log("Processing COD order...");
+        console.log("COD FLOW");
         setShowSuccess(true);
         clearCart();
         setLoading(false);
       } else {
         // ONLINE FLOW
-        console.log("Processing ONLINE order via Razorpay...");
+        console.log("ONLINE FLOW");
         
+        // Load Razorpay Script
+        const isScriptLoaded = await loadRazorpay();
+        if (!isScriptLoaded) {
+          setLoading(false);
+          alert("Razorpay SDK failed to load");
+          return;
+        }
+
         // Create Razorpay Order on Backend
-        console.log("Initiating Razorpay order creation...");
         const rzpOrderRes = await fetchApi('/api/payment/create-order', {
           method: 'POST',
           body: { amount: total, orderId: dbOrderId }
@@ -160,10 +143,9 @@ export default function CheckoutPage() {
         }
 
         const rzpOrder = await rzpOrderRes.json();
-        console.log("Razorpay order initiated:", rzpOrder.id);
 
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '', // Use the environment variable
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
           amount: rzpOrder.amount,
           currency: rzpOrder.currency,
           name: 'SmartBuy',
@@ -171,18 +153,26 @@ export default function CheckoutPage() {
           image: '/logo.png',
           order_id: rzpOrder.id,
           handler: async (response: any) => {
-            console.log("Payment successful, verifying...");
+            console.log("Payment completed, verifying...");
             try {
               const verifyRes = await fetchApi('/api/payment/verify', {
                 method: 'POST',
-                body: {
-                  ...response,
-                  dbOrderId
-                }
+                body: { ...response, dbOrderId }
               });
 
               if (verifyRes.ok) {
-                console.log("Payment verified successfully");
+                console.log("Payment verified, updating order status...");
+                // Update order to paid
+                await fetchApi(`/api/orders/${dbOrderId}/pay`, {
+                  method: 'PUT',
+                  body: {
+                    id: response.razorpay_payment_id,
+                    status: 'Paid',
+                    update_time: new Date().toISOString(),
+                    email_address: user.email
+                  }
+                });
+
                 setShowSuccess(true);
                 clearCart();
               } else {
@@ -200,12 +190,10 @@ export default function CheckoutPage() {
             email: user.email,
             contact: formData.phone
           },
-          theme: {
-            color: '#10b981'
-          },
+          theme: { color: '#10b981' },
           modal: {
             ondismiss: function() {
-              console.log("Razorpay checkout closed by user");
+              console.log("Razorpay checkout closed");
               setLoading(false);
             }
           }
@@ -216,10 +204,11 @@ export default function CheckoutPage() {
       }
     } catch (err: any) {
       console.error("Checkout Error:", err);
-      setError(err.message || "Something went wrong. Please try again.");
+      setError(err.message || "Something went wrong.");
       setLoading(false);
     }
   };
+
 
   if (showSuccess) {
     return (
@@ -362,10 +351,7 @@ export default function CheckoutPage() {
                     name="paymentMethod" 
                     value="ONLINE"
                     checked={paymentMethod === 'ONLINE'} 
-                    onChange={(e) => {
-                      setPaymentMethod(e.target.value as 'ONLINE');
-                      console.log("Selected:", e.target.value);
-                    }}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
                     className="w-5 h-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" 
                   />
                   <div>
@@ -392,10 +378,7 @@ export default function CheckoutPage() {
                     name="paymentMethod" 
                     value="COD"
                     checked={paymentMethod === 'COD'} 
-                    onChange={(e) => {
-                      setPaymentMethod(e.target.value as 'COD');
-                      console.log("Selected:", e.target.value);
-                    }}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
                     className="w-5 h-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" 
                   />
                   <div>
