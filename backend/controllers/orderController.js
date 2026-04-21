@@ -54,11 +54,12 @@ exports.addOrderItems = async (req, res) => {
         orderItems: mappedItems,
         user: orderUser,
         shippingAddress,
-        paymentMethod,
+        paymentMethod: paymentMethod === 'Razorpay' ? 'ONLINE' : paymentMethod, // Fallback for old frontend
         itemsPrice: Number(itemsPrice || 0),
         taxPrice: Number(taxPrice || 0),
         shippingPrice: Number(shippingPrice || 0),
-        totalPrice: Number(totalPrice || 0)
+        totalPrice: Number(totalPrice || 0),
+        paymentStatus: 'Pending'
       });
 
       const createdOrder = await order.save();
@@ -103,6 +104,8 @@ exports.updateOrderToPaid = async (req, res) => {
     if (order) {
       order.isPaid = true;
       order.paidAt = Date.now();
+      order.paymentStatus = 'Paid';
+      order.paymentId = req.body.id;
       order.paymentResult = {
         id: req.body.id,
         status: req.body.status,
