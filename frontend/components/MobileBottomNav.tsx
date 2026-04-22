@@ -12,7 +12,7 @@ export default function MobileBottomNav() {
   const { cart } = useCart();
   const { wishlist } = useWishlist();
 
-  const cartCount = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlist.length;
 
   const navItems = [
