@@ -18,7 +18,7 @@ export default function Navbar() {
   const router = useRouter();
   const [localSearch, setLocalSearch] = useState('');
   const [scrolled, setScrolled] = useState(false);
-  
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
@@ -36,20 +36,19 @@ export default function Navbar() {
   const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
 
   return (
-    <nav className={`sticky top-0 z-50 w-full transition-all duration-500 border-b ${
-      scrolled 
-        ? 'bg-white/80 dark:bg-[#0b1120]/80 backdrop-blur-lg shadow-lg border-[var(--color-primary)]/10 py-0' 
-        : 'bg-white dark:bg-[#0b1120] border-transparent py-1'
-    }`}>
+    <nav className={`sticky top-0 z-50 w-full transition-all duration-500 border-b ${scrolled
+      ? 'bg-white/80 dark:bg-[#0b1120]/80 backdrop-blur-lg shadow-lg border-[var(--color-primary)]/10 py-0'
+      : 'bg-white dark:bg-[#0b1120] border-transparent py-1'
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <m.div 
+        <m.div
           animate={{ height: scrolled ? 52 : 56 }}
           className="flex justify-between items-center transition-all duration-300"
         >
           {/* Logo Section */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
-              <m.div 
+              <m.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-extrabold text-xl shadow-[0_4px_12px_-2px_var(--color-primary-glow)]"
@@ -70,20 +69,20 @@ export default function Navbar() {
           {/* Search Bar - Hidden on Mobile */}
           <div className="hidden md:flex flex-1 items-center justify-center px-10">
             <form onSubmit={handleSearch} className="w-full max-w-lg relative group">
-              <m.div 
+              <m.div
                 initial={false}
                 animate={{ scale: scrolled ? 0.98 : 1 }}
                 className="relative"
               >
                 <div className="absolute inset-0 bg-[var(--color-primary)] rounded-full blur-[15px] opacity-0 group-focus-within:opacity-10 transition-opacity duration-500" />
-                <input 
-                  type="text" 
-                  placeholder="Search for fresh groceries..." 
+                <input
+                  type="text"
+                  placeholder="Search for fresh groceries..."
                   value={localSearch}
                   onChange={(e) => setLocalSearch(e.target.value)}
                   className="w-full bg-[var(--color-card)] border border-[var(--color-border)] text-sm rounded-full pl-5 pr-12 py-2.5 outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all shadow-sm group-hover:shadow-md relative z-10"
                 />
-                <m.button 
+                <m.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   type="submit"
@@ -100,11 +99,11 @@ export default function Navbar() {
             <div className="hidden sm:block">
               <ThemeToggle />
             </div>
-            
+
             {isAdmin && (
               <m.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link 
-                  href="/admin" 
+                <Link
+                  href="/admin"
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-orange-500/10 border border-white/10"
                 >
                   👑 Admin
@@ -117,7 +116,7 @@ export default function Navbar() {
                 <Heart className="w-6 h-6" />
                 <AnimatePresence>
                   {wishlist.length > 0 && (
-                    <m.span 
+                    <m.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
@@ -130,17 +129,17 @@ export default function Navbar() {
               </Link>
             </m.div>
 
-            <m.button 
+            <m.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
-              onClick={toggleCart} 
+              onClick={toggleCart}
               className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all duration-200 group font-bold"
             >
               <div className="relative">
                 <ShoppingCart className="w-6 h-6" />
                 <AnimatePresence>
                   {cartItemCount > 0 && (
-                    <m.span 
+                    <m.span
                       initial={{ scale: 0, y: 10 }}
                       animate={{ scale: 1, y: 0 }}
                       exit={{ scale: 0, y: 10 }}
