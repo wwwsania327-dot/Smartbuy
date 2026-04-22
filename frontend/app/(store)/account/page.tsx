@@ -17,6 +17,7 @@ import {
   updateProfile, updateSettings
 } from "@/lib/api";
 import { useTheme } from "next-themes";
+import RatingModal from "@/components/RatingModal";
 
 type Tab = 'main' | 'addresses' | 'notifications' | 'security' | 'settings';
 
@@ -44,6 +45,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<any>(null);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
   const cartCount  = cart.reduce((s, i) => s + i.quantity, 0);
   const wishlistCount = wishlist.length;
@@ -145,11 +147,12 @@ export default function AccountPage() {
     {
       title: "Support",
       items: [
-        { icon: <HelpCircle className="w-5 h-5" />,  label: "Help & FAQs",    href: "#" },
-        { icon: <Star className="w-5 h-5" />,         label: "Rate the App",   href: "#" },
+        { icon: <HelpCircle className="w-5 h-5" />,  label: "Help & FAQs",    href: "/help" },
+        { icon: <Star className="w-5 h-5" />,         label: "Rate the App",   onClick: () => setIsRatingModalOpen(true) },
       ],
     },
   ];
+
 
   const renderHeader = () => (
     <div className="account-hero">
@@ -493,6 +496,11 @@ export default function AccountPage() {
       {activeTab === 'notifications' && renderNotifications()}
       {activeTab === 'security' && renderSecurity()}
       {activeTab === 'settings' && renderSettings()}
+
+      <RatingModal 
+        isOpen={isRatingModalOpen} 
+        onClose={() => setIsRatingModalOpen(false)} 
+      />
     </div>
   );
 }

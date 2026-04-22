@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -19,7 +19,7 @@ export default function StoreLayout({
     <CartProvider>
       <Navbar />
       <AnimatePresence mode="wait">
-        <motion.main
+        <m.main
           key={pathname}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -29,7 +29,7 @@ export default function StoreLayout({
         >
           <BackButton />
           {children}
-        </motion.main>
+        </m.main>
       </AnimatePresence>
       <Footer />
       <MobileBottomNav />

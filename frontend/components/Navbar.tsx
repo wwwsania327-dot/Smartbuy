@@ -6,30 +6,64 @@ import { ThemeToggle } from './ThemeToggle';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { useSearch } from '../context/SearchContext';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { ShoppingCart, User, Search, Menu, Heart } from 'lucide-react';
+import { m, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from './ThemeToggle';
+import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { useRouter } from 'next/navigation';
 import CartDrawer from './CartDrawer';
 
 export default function Navbar() {
   const { wishlist } = useWishlist();
   const { cart, toggleCart } = useCart();
   const { user } = useAuth();
-  const { searchQuery, setSearchQuery } = useSearch();
+  const router = useRouter();
+  const [localSearch, setLocalSearch] = useState('');
+  const [scrolled, setScrolled] = useState(false);
   
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (localSearch.trim()) {
+      router.push(`/products?search=${encodeURIComponent(localSearch.trim())}`);
+    }
+  };
+
   const cartItemCount = cart.reduce((acc: number, item: any) => acc + item.quantity, 0);
   const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
 
   return (
-    <nav className="glass sticky top-0 z-50 w-full border-b border-[var(--color-border)] shadow-premium transition-all duration-300">
+    <nav className={`sticky top-0 z-50 w-full transition-all duration-500 border-b ${
+      scrolled 
+        ? 'bg-white/80 dark:bg-[#0b1120]/80 backdrop-blur-lg shadow-lg border-[var(--color-primary)]/10 py-0' 
+        : 'bg-white dark:bg-[#0b1120] border-transparent py-1'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <m.div 
+          animate={{ height: scrolled ? 52 : 56 }}
+          className="flex justify-between items-center transition-all duration-300"
+        >
           {/* Logo Section */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-extrabold text-2xl shadow-[0_8px_16px_-4px_var(--color-primary-glow)] group-hover:scale-110 transition-transform duration-300">
+              <m.div 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-extrabold text-xl shadow-[0_4px_12px_-2px_var(--color-primary-glow)]"
+              >
                 S
-              </div>
+              </m.div>
               <div className="flex flex-col">
-                <span className="font-extrabold text-2xl leading-none tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-green-500 dark:from-emerald-400 dark:to-green-300">
+                <span className="font-extrabold text-xl leading-none tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-green-500 dark:from-emerald-400 dark:to-green-300">
                   Smart<span className="text-[var(--color-foreground)]">Buy</span>
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mt-0.5">
@@ -40,20 +74,31 @@ export default function Navbar() {
           </div>
 
           {/* Search Bar - Hidden on Mobile */}
-          <div className="hidden md:flex flex-1 items-center justify-center px-12">
-            <div className="w-full max-w-xl relative group">
-              <div className="absolute inset-0 bg-[var(--color-primary)] rounded-full blur-[20px] opacity-0 group-focus-within:opacity-10 transition-opacity duration-500" />
-              <input 
-                type="text" 
-                placeholder="Search for fresh groceries..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[var(--color-card)] border border-[var(--color-border)] text-sm rounded-full pl-5 pr-12 py-3.5 outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all shadow-sm group-hover:shadow-md relative z-10"
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-[var(--color-primary)] p-1.5 rounded-full text-white shadow-lg shadow-green-500/20">
-                <Search className="w-4 h-4" />
-              </div>
-            </div>
+          <div className="hidden md:flex flex-1 items-center justify-center px-10">
+            <form onSubmit={handleSearch} className="w-full max-w-lg relative group">
+              <m.div 
+                initial={false}
+                animate={{ scale: scrolled ? 0.98 : 1 }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-[var(--color-primary)] rounded-full blur-[15px] opacity-0 group-focus-within:opacity-10 transition-opacity duration-500" />
+                <input 
+                  type="text" 
+                  placeholder="Search for fresh groceries..." 
+                  value={localSearch}
+                  onChange={(e) => setLocalSearch(e.target.value)}
+                  className="w-full bg-[var(--color-card)] border border-[var(--color-border)] text-sm rounded-full pl-5 pr-12 py-2.5 outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all shadow-sm group-hover:shadow-md relative z-10"
+                />
+                <m.button 
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  type="submit"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 bg-[var(--color-primary)] p-1.5 rounded-full text-white shadow-lg shadow-green-500/20 transition-transform"
+                >
+                  <Search className="w-4 h-4" />
+                </m.button>
+              </m.div>
+            </form>
           </div>
 
           {/* Right Icons */}
@@ -63,46 +108,69 @@ export default function Navbar() {
             </div>
             
             {isAdmin && (
-              <Link 
-                href="/admin" 
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-orange-500/20 hover:scale-105 active:scale-95 transition-all duration-200 border border-white/20"
-              >
-                <span>👑</span>
-                <span>Admin</span>
-              </Link>
+              <m.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link 
+                  href="/admin" 
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-orange-500/10 border border-white/10"
+                >
+                  <span>👑</span>
+                  <span>Admin</span>
+                </Link>
+              </m.div>
             )}
 
 
-            <Link href="/wishlist" className="p-2.5 rounded-xl text-[var(--color-foreground)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-500 transition-all duration-200 relative">
-              <Heart className="w-6 h-6" />
-              {wishlist.length > 0 && (
-                <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                  {wishlist.length}
-                </span>
-              )}
-            </Link>
+            <m.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Link href="/wishlist" className="p-2.5 rounded-xl text-[var(--color-foreground)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-500 transition-all duration-200 relative block">
+                <Heart className="w-6 h-6" />
+                <AnimatePresence>
+                  {wishlist.length > 0 && (
+                    <m.span 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-lg"
+                    >
+                      {wishlist.length}
+                    </m.span>
+                  )}
+                </AnimatePresence>
+              </Link>
+            </m.div>
 
-            <button 
+            <m.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
               onClick={toggleCart} 
-              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 shadow-lg shadow-emerald-500/30 transition-all duration-200 hover:scale-105 active:scale-95 group font-bold"
+              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all duration-200 group font-bold"
             >
               <div className="relative">
-                <ShoppingCart className="w-5 h-5" />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-3 -right-3 bg-orange-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-md">
-                    {cartItemCount}
-                  </span>
-                )}
+                <ShoppingCart className="w-6 h-6" />
+                <AnimatePresence>
+                  {cartItemCount > 0 && (
+                    <m.span 
+                      initial={{ scale: 0, y: 10 }}
+                      animate={{ scale: 1, y: 0 }}
+                      exit={{ scale: 0, y: 10 }}
+                      className="absolute -top-3 -right-3 bg-orange-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-md"
+                    >
+                      {cartItemCount}
+                    </m.span>
+                  )}
+                </AnimatePresence>
               </div>
               <span className="hidden lg:block text-sm">₹{cart.reduce((s: number, i: any) => s + (i.product as any).price * i.quantity, 0).toFixed(0)}</span>
-            </button>
+            </m.button>
 
             {/* Mobile Menu Button */}
-            <button className="md:hidden p-2 rounded-lg text-[var(--color-foreground)]">
+            <m.button 
+              whileTap={{ scale: 0.9 }}
+              className="md:hidden p-2 rounded-lg text-[var(--color-foreground)]"
+            >
               <Menu className="w-6 h-6" />
-            </button>
+            </m.button>
           </div>
-        </div>
+        </m.div>
       </div>
       <CartDrawer />
     </nav>

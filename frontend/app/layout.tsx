@@ -7,12 +7,9 @@ export const metadata: Metadata = {
 };
 
 import SplashScreen from '../components/SplashScreen';
-import { ThemeProvider } from '../components/ThemeProvider';
-import { AuthProvider } from '../context/AuthContext';
-import { ToastProvider } from '../context/ToastContext';
-import { WishlistProvider } from '../context/WishlistContext';
-import { OrderProvider } from '../context/OrderContext';
-import { SearchProvider } from '../context/SearchContext';
+import { AppProviders } from '../components/AppProviders';
+import SplashScreen from '../components/SplashScreen';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function RootLayout({
   children,
@@ -30,22 +27,14 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0)_0%,var(--background)_100%)] opacity-50" />
         </div>
 
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ToastProvider>
-            <AuthProvider>
-              <WishlistProvider>
-                <OrderProvider>
-                  <SearchProvider>
-                    <SplashScreen />
-                    <div className="relative z-10 flex-grow flex flex-col">
-                      {children}
-                    </div>
-                  </SearchProvider>
-                </OrderProvider>
-              </WishlistProvider>
-            </AuthProvider>
-          </ToastProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <AppProviders>
+            <SplashScreen />
+            <div className="relative z-10 flex-grow flex flex-col">
+              {children}
+            </div>
+          </AppProviders>
+        </ErrorBoundary>
       </body>
     </html>
   );

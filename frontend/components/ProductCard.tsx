@@ -3,7 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingCart, Star } from 'lucide-react';
+import { ShoppingCart, Star, Loader2 } from 'lucide-react';
+import { m } from 'framer-motion';
 
 export interface ProductData {
   id: string | number;
@@ -23,6 +24,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  const [isAdding, setIsAdding] = React.useState(false);
   const inStock = product.stock !== undefined ? product.stock > 0 : true;
 
   // Calculate discount
@@ -107,18 +109,31 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
           </div>
 
           {/* Flipkart style Add to Cart Button */}
-          <button 
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(product); }}
-            disabled={!inStock}
-            className={`w-full font-bold py-2.5 px-4 rounded shadow-sm flex items-center justify-center gap-2 uppercase tracking-wide text-sm transition-colors
+          <m.button 
+            whileTap={{ scale: 0.98 }}
+            onClick={async (e) => { 
+              e.preventDefault(); 
+              e.stopPropagation(); 
+              if (isAdding) return;
+              setIsAdding(true);
+              await onAddToCart(product);
+              // Simulated feedback delay
+              setTimeout(() => setIsAdding(false), 600);
+            }}
+            disabled={!inStock || isAdding}
+            className={`w-full font-bold py-2.5 px-4 rounded shadow-sm flex items-center justify-center gap-2 uppercase tracking-wide text-sm transition-all
               ${inStock 
                 ? "bg-[#ff9f00] hover:bg-[#f39800] text-white focus:ring-2 focus:ring-offset-2 focus:ring-[#ff9f00] dark:focus:ring-offset-gray-800" 
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"}
             `}
           >
-            <ShoppingCart className="w-5 h-5 fill-current" />
-            {inStock ? "Add to Cart" : "Out of Stock"}
-          </button>
+            {isAdding ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <ShoppingCart className="w-5 h-5 fill-current" />
+            )}
+            {inStock ? (isAdding ? "Adding..." : "Add to Cart") : "Out of Stock"}
+          </m.button>
         </div>
       </div>
     </Link>

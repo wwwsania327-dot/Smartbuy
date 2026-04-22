@@ -5,41 +5,62 @@ import { Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import ProductCard, { ProductData } from '@/components/ProductCard';
 import { fetchMergedProducts, Product } from '@/lib/products';
-import { useSearch } from '@/context/SearchContext';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function ProductsPage() {
-  const [products, setProducts] = useState<ProductData[]>([]);
-  const [loading, setLoading] = useState(true);
+import { useProducts } from '@/hooks/useProducts';
+import { SkeletonGrid } from '@/components/SkeletonLoader';
+
+function ProductsContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
+  const { data: products = [], isLoading, isError, refetch } = useProducts();
   
   // Filtering & Sorting State
-  const { searchQuery, setSearchQuery } = useSearch();
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [category, setCategory] = useState('All');
   const [sortOption, setSortOption] = useState('default');
   
   const { addToCart } = useCart();
 
+  // Debounce logic
   useEffect(() => {
-    const load = async () => {
-      try {
-        const merged = await fetchMergedProducts();
-        // Cast to ProductData — Product is a strict superset
-        setProducts(merged as unknown as ProductData[]);
-      } catch (err) {
-        console.error('[ProductsPage] load error:', err);
-      } finally {
-        setLoading(false);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Update searchTerm when URL search param changes (e.g. from Navbar)
+  useEffect(() => {
+    if (initialSearch) {
+      setSearchTerm(initialSearch);
+      setDebouncedSearch(initialSearch);
+      // Optional: scroll to results if search was triggered from outside
+      const productsSection = document.getElementById('products-section');
+      if (productsSection) {
+        productsSection.scrollIntoView({ behavior: 'smooth' });
       }
-    };
+    }
+  }, [initialSearch]);
 
-    load();
-
-    // Re-fetch whenever admin panel saves/deletes a product
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'admin_products' || e.key === null) load();
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
+  if (isError) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+        <div className="text-red-500 text-5xl mb-4">⚠️</div>
+        <h2 className="text-2xl font-bold mb-2">Failed to load products</h2>
+        <p className="text-gray-600 mb-6">There was an error fetching the product list. Please try again.</p>
+        <button 
+          onClick={() => refetch()}
+          className="px-6 py-2 bg-emerald-600 text-white rounded-full font-bold hover:bg-emerald-700 transition-colors"
+        >
+          Retry Loading
+        </button>
+      </div>
+    );
+  }
 
   // Compute Categories dynamically from product data (handling populated objects)
   const categoriesList = ['All', ...new Set(products.map(p => {
@@ -50,7 +71,7 @@ export default function ProductsPage() {
   // Apply filters and sort
   let filteredProducts = products.filter((p) => {
     const pCatName = typeof p.category === 'object' ? (p.category as any)?.name : p.category;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchesCategory = category === 'All' || pCatName === category;
     return matchesSearch && matchesCategory;
   });
@@ -67,7 +88,7 @@ export default function ProductsPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
       
       {/* Header & Sticky Filter Bar */}
-      <div className="sticky top-16 z-30 bg-white/90 dark:bg-[#0b1120]/90 backdrop-blur-md pt-4 pb-4 border-b border-gray-200 dark:border-gray-800 mb-8 flex flex-col md:flex-row gap-4 justify-between items-center w-full">
+      <div id="products-section" className="sticky top-16 z-30 bg-white/90 dark:bg-[#0b1120]/90 backdrop-blur-md pt-4 pb-4 border-b border-gray-200 dark:border-gray-800 mb-8 flex flex-col md:flex-row gap-4 justify-between items-center w-full">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white hidden md:block">
           All Products
         </h1>
@@ -78,8 +99,8 @@ export default function ProductsPage() {
             <input 
               type="text" 
               placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
             <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
@@ -118,18 +139,8 @@ export default function ProductsPage() {
       </div>
 
       {/* Grid */}
-      {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-100 dark:border-gray-700 p-4 animate-pulse flex flex-col h-full">
-              <div className="w-full pt-[100%] bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
-              <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-full mb-4"></div>
-              <div className="mt-auto h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
-              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-            </div>
-          ))}
-        </div>
+      {isLoading ? (
+        <SkeletonGrid count={8} />
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-20 text-gray-500 dark:text-gray-400">
           <div className="text-5xl mb-4 opacity-50">📦</div>
@@ -159,5 +170,18 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+        <p className="text-gray-500">Loading products...</p>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }

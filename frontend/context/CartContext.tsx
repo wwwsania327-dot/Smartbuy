@@ -31,9 +31,12 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+import { useToast } from "./ToastContext";
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Load from local storage on mount
@@ -41,15 +44,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (saved) {
       try {
         const parsed: CartItem[] = JSON.parse(saved);
-        // Validate: Ensure product and image exist, but don't be too strict about the path format
-        // to avoid purging valid items during site updates.
         const valid = parsed.filter(
           (item) => item?.product?.id && item?.product?.image
         );
         setCart(valid);
-        // If we cleaned up corrupt data, save the fixed version back
         if (valid.length !== parsed.length) {
-          console.log('[CartContext] Purged', parsed.length - valid.length, 'invalid cart items');
           localStorage.setItem("cart", JSON.stringify(valid));
         }
       } catch (error) {
@@ -60,7 +59,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Always sync cart state to localStorage (including empty cart to clear it)
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
@@ -76,11 +74,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { product, quantity }];
     });
+    
+    toast(`Added ${product.name} to cart!`, "success");
   };
 
   const removeFromCart = (productId: string | number) => {
+    const itemToRemove = cart.find(i => String(i.product.id) === String(productId));
     setCart((prev) => prev.filter((item) => String(item.product.id) !== String(productId)));
-    if (cart.length === 1) localStorage.removeItem("cart"); // Clean up if empty
+    
+    if (itemToRemove) {
+      toast(`Removed ${itemToRemove.product.name} from cart`, "error");
+    }
   };
 
   const updateQuantity = (productId: string | number, quantity: number) => {
@@ -95,6 +99,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const clearCart = () => {
     setCart([]);
     localStorage.removeItem("cart");
+    toast("Cart cleared", "success");
   };
 
   const cartTotal = cart.reduce((total, item) => {
