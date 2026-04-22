@@ -108,8 +108,8 @@ export default function MobileBottomNav() {
                         />
                       )}
                     </AnimatePresence>
-                  </motion.div>
-                  <motion.span 
+                  </m.div>
+                  <m.span 
                     animate={{ 
                       opacity: isActive ? 1 : 0.6,
                       scale: isActive ? 1.05 : 1
@@ -120,7 +120,7 @@ export default function MobileBottomNav() {
                     `}
                   >
                     {item.name}
-                  </motion.span>
+                  </m.span>
                 </Link>
               </li>
             );

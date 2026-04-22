@@ -1,20 +1,14 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, User, Search, Menu, Heart } from 'lucide-react';
+import { ShoppingCart, Search, Menu, Heart } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ShoppingCart, User, Search, Menu, Heart } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
-import { ThemeToggle } from './ThemeToggle';
-import { useWishlist } from '../context/WishlistContext';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
-import { useRouter } from 'next/navigation';
 import CartDrawer from './CartDrawer';
 
 export default function Navbar() {

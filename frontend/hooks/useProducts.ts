@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchMergedProducts } from "@/utils/api";
+import { fetchMergedProducts } from "@/lib/products";
 
 export interface ProductData {
   id: string | number;

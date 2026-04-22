@@ -8,7 +8,6 @@ export const metadata: Metadata = {
 
 import SplashScreen from '../components/SplashScreen';
 import { AppProviders } from '../components/AppProviders';
-import SplashScreen from '../components/SplashScreen';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function RootLayout({
