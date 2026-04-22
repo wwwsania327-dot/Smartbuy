@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import SplashScreen from '../components/SplashScreen';
+import { AppProviders } from '../components/AppProviders';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export const metadata: Metadata = {
   title: 'SmartBuy - Modern Grocery Shopping',
   description: 'Your one-stop destination for fresh groceries delivered right to your doorstep.',
 };
-
-import SplashScreen from '../components/SplashScreen';
-import { AppProviders } from '../components/AppProviders';
-import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function RootLayout({
   children,
@@ -18,7 +17,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="flex flex-col min-h-screen selection:bg-[var(--color-primary)] selection:text-white">
-        {/* Aesthetic Background Elements */}
         <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
           <div className="aura top-[-10%] left-[-10%] bg-green-400/20 dark:bg-emerald-500/10" />
           <div className="aura bottom-[-10%] right-[-10%] bg-emerald-400/20 dark:bg-green-500/10 [animation-delay:-5s]" />

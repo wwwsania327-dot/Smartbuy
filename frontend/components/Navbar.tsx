@@ -107,12 +107,10 @@ export default function Navbar() {
                   href="/admin" 
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-orange-500/10 border border-white/10"
                 >
-                  <span>👑</span>
-                  <span>Admin</span>
+                  👑 Admin
                 </Link>
               </m.div>
             )}
-
 
             <m.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Link href="/wishlist" className="p-2.5 rounded-xl text-[var(--color-foreground)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-500 transition-all duration-200 relative block">
@@ -153,14 +151,10 @@ export default function Navbar() {
                   )}
                 </AnimatePresence>
               </div>
-              <span className="hidden lg:block text-sm">₹{cart.reduce((s: number, i: any) => s + (i.product as any).price * i.quantity, 0).toFixed(0)}</span>
+              <span className="hidden lg:block text-sm">₹{cart.reduce((s, i) => s + (i.product as any).price * i.quantity, 0).toFixed(0)}</span>
             </m.button>
 
-            {/* Mobile Menu Button */}
-            <m.button 
-              whileTap={{ scale: 0.9 }}
-              className="md:hidden p-2 rounded-lg text-[var(--color-foreground)]"
-            >
+            <m.button whileTap={{ scale: 0.9 }} className="md:hidden p-2 rounded-lg text-[var(--color-foreground)]">
               <Menu className="w-6 h-6" />
             </m.button>
           </div>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchMergedProducts } from "@/lib/products";
+import { fetchMergedProducts } from "@/utils/api";
 
 export interface ProductData {
   id: string | number;
@@ -20,6 +20,6 @@ export function useProducts() {
       const data = await fetchMergedProducts();
       return data as unknown as ProductData[];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
