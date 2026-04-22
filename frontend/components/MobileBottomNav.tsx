@@ -12,7 +12,7 @@ export default function MobileBottomNav() {
   const { cart } = useCart();
   const { wishlist } = useWishlist();
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
   const wishlistCount = wishlist.length;
 
   const navItems = [
@@ -25,7 +25,6 @@ export default function MobileBottomNav() {
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 md:bottom-0 md:left-0 md:translate-x-0 md:w-full">
 
-      {/* Floating Cart Button */}
       <AnimatePresence>
         {cartCount > 0 && (
           <m.div
@@ -44,7 +43,6 @@ export default function MobileBottomNav() {
         )}
       </AnimatePresence>
 
-      {/* Bottom Nav */}
       <nav className="bg-white dark:bg-gray-900 rounded-2xl px-4 py-2 shadow-lg">
         <ul className="flex justify-between items-center">
           {navItems.map((item) => {
@@ -58,8 +56,7 @@ export default function MobileBottomNav() {
 
                   <m.div
                     whileTap={{ scale: 0.9 }}
-                    className={`relative p-2 ${isActive ? 'text-green-600' : 'text-gray-400'
-                      }`}
+                    className={`relative p-2 ${isActive ? 'text-green-600' : 'text-gray-400'}`}
                   >
                     <item.icon className="w-6 h-6" />
 
