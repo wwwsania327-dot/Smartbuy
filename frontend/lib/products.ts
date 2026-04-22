@@ -19,7 +19,7 @@ export interface Product {
   originalPrice?: number;
   discount?: number;
   discountPrice?: number;
-  category?: string;
+  category?: string | { name: string };
   stock?: number;
   rating?: number;
   reviews?: number;

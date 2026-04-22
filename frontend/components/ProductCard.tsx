@@ -12,7 +12,7 @@ export interface ProductData {
   price: number;
   originalPrice?: number;
   image: string;
-  category?: string;
+  category?: string | { name: string };
   rating?: number;
   reviews?: number;
   stock?: number;

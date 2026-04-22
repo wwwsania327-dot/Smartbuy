@@ -279,7 +279,7 @@ export default function ProductDetailPage() {
                 <button 
                  onClick={() => {
                    console.log("PDP Desktop - Adding to Cart Payload:", { id: product.id, name: product.name });
-                   addToCart({ id: product.id, name: product.name, price: product.price, discount: product.price, image: product.image, weight: selectedWeight, category: product.category || '' });
+                   addToCart({ id: product.id, name: product.name, price: product.price, discount: product.price, image: product.image, weight: selectedWeight, category: typeof product.category === 'object' ? (product.category as any)?.name : (product.category || '') });
                  }}
                   className="flex-1 bg-[#ff9f00] hover:bg-[#f39800] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 uppercase tracking-wide shadow-md transition-colors"
                 >
@@ -305,7 +305,7 @@ export default function ProductDetailPage() {
              <button 
                onClick={() => {
                  console.log("PDP Mobile - Adding to Cart Payload:", { id: product.id, name: product.name });
-                 addToCart({ id: product.id, name: product.name, price: product.price, discount: product.price, image: product.image, weight: selectedWeight, category: product.category || '' });
+                 addToCart({ id: product.id, name: product.name, price: product.price, discount: product.price, image: product.image, weight: selectedWeight, category: typeof product.category === 'object' ? (product.category as any)?.name : (product.category || '') });
                }}
                className="w-full bg-[#ff9f00] active:bg-[#e68f00] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 uppercase tracking-wide shadow-lg transform active:scale-[0.98] transition-transform"
              >

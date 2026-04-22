@@ -162,7 +162,7 @@ function ProductsContent() {
                   discount: product.price, // API doesn't mock discount conceptually yet
                   image: product.image,
                   weight: '',
-                  category: product.category || ''
+                  category: typeof product.category === 'object' ? (product.category as any)?.name : (product.category || '')
                 });
               }}
             />
