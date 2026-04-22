@@ -1,17 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchMergedProducts } from "../utils/api";
 
-export interface ProductData {
-  id: string | number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  category?: string | { name: string };
-  rating?: number;
-  reviews?: number;
-  stock?: number;
-}
+import { ProductData } from "../components/ProductCard";
 
 export function useProducts() {
   return useQuery({
