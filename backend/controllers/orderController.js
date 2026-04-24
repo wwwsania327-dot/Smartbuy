@@ -29,6 +29,8 @@ exports.addOrderItems = async (req, res) => {
       shippingAddress,
       paymentMethod,
       itemsPrice,
+      discountPrice,
+      couponCode,
       taxPrice,
       shippingPrice,
       totalPrice
@@ -56,6 +58,8 @@ exports.addOrderItems = async (req, res) => {
         shippingAddress,
         paymentMethod: paymentMethod === 'Razorpay' ? 'ONLINE' : paymentMethod, // Fallback for old frontend
         itemsPrice: Number(itemsPrice || 0),
+        discountPrice: Number(discountPrice || 0),
+        couponCode: couponCode || '',
         taxPrice: Number(taxPrice || 0),
         shippingPrice: Number(shippingPrice || 0),
         totalPrice: Number(totalPrice || 0),

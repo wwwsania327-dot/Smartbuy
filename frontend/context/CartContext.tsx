@@ -24,15 +24,26 @@ type CartContextType = {
   updateQuantity: (productId: string | number, quantity: number) => void;
   clearCart: () => void;
   cartTotal: number;
+  appliedCoupon: any | null;
+  discountAmount: number;
+  totalWithDiscount: number;
+  removeCoupon: () => void;
+  fetchApplicableCoupon: () => Promise<void>;
+  isFetchingCoupon: boolean;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 import { useToast } from "./ToastContext";
+import { useAuth } from "./AuthContext";
+import { getApplicableCoupon } from "../lib/api";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [appliedCoupon, setAppliedCoupon] = useState<any | null>(null);
+  const [isFetchingCoupon, setIsFetchingCoupon] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     // Load from local storage on mount
@@ -103,10 +114,61 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return total + price * item.quantity;
   }, 0);
 
+  const fetchApplicableCoupon = async () => {
+    try {
+      setIsFetchingCoupon(true);
+      const coupon = await getApplicableCoupon();
+      if (coupon && coupon.code) {
+        setAppliedCoupon(coupon);
+        toast(`Coupon ${coupon.code} applied successfully 🎉`, "success");
+      }
+    } catch (err) {
+      console.error("Failed to fetch coupon", err);
+    } finally {
+      setIsFetchingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    toast("Coupon removed", "info");
+  };
+
+  // Auto-fetch coupon on mount or when cart/user changes
+  useEffect(() => {
+    if (cart.length > 0 && !appliedCoupon && !isFetchingCoupon) {
+      fetchApplicableCoupon();
+    }
+  }, [cart.length, user]);
+
+  const discountAmount = appliedCoupon ? (
+    appliedCoupon.type === 'percentage' 
+      ? (cartTotal * appliedCoupon.discount) / 100 
+      : appliedCoupon.discount
+  ) : 0;
+
+  // Apply max discount limit if exists
+  const finalDiscount = (appliedCoupon?.maxDiscount && discountAmount > appliedCoupon.maxDiscount) 
+    ? appliedCoupon.maxDiscount 
+    : discountAmount;
+
+  const totalWithDiscount = cartTotal - finalDiscount;
+
   return (
     <CartContext.Provider
       value={{ 
-        cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal
+        cart, 
+        addToCart, 
+        removeFromCart, 
+        updateQuantity, 
+        clearCart, 
+        cartTotal,
+        appliedCoupon,
+        discountAmount: finalDiscount,
+        totalWithDiscount,
+        removeCoupon,
+        fetchApplicableCoupon,
+        isFetchingCoupon
       }}
     >
       {children}

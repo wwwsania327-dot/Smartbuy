@@ -8,12 +8,12 @@ import { useRouter } from "next/navigation";
 
 // ─── Main Cart Page ───────────────────────────────────────────────────────────
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, cartTotal } = useCart();
+  const { cart, removeFromCart, updateQuantity, cartTotal, appliedCoupon, discountAmount, totalWithDiscount, removeCoupon, isFetchingCoupon } = useCart();
   const router = useRouter();
 
 
-  const taxes  = cartTotal * 0.05;
-  const total  = cartTotal + taxes;
+  const taxes  = totalWithDiscount * 0.05;
+  const total  = totalWithDiscount + taxes;
 
   // ── Empty cart state ──────────────────────────────────────────────────────
   if (cart.length === 0) {
@@ -107,17 +107,45 @@ export default function CartPage() {
             <div className="space-y-3 text-sm mb-6 pb-6 border-b border-[var(--color-border)]">
               <div className="flex justify-between">
                 <span className="text-gray-500">Subtotal ({cart.length} items)</span>
-                <span className="font-medium">₹{cartTotal.toFixed(2)}</span>
+                <span className="font-medium text-[var(--color-foreground)]">₹{cartTotal.toFixed(2)}</span>
               </div>
+              
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <div className="flex flex-col">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <button 
+                      onClick={removeCoupon}
+                      className="text-[10px] text-red-500 hover:underline text-left w-fit"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <span>-₹{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+
+              {isFetchingCoupon && (
+                <div className="flex justify-between text-indigo-500 text-xs animate-pulse">
+                  <span>Applying best coupon...</span>
+                </div>
+              )}
+
               <div className="flex justify-between">
                 <span className="text-gray-500">Tax (5%)</span>
-                <span className="font-medium">₹{taxes.toFixed(2)}</span>
+                <span className="font-medium text-[var(--color-foreground)]">₹{taxes.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Delivery Fee</span>
                 <span className="font-medium text-[var(--color-primary)]">FREE</span>
               </div>
             </div>
+
+            {appliedCoupon && (
+              <div className="mb-4 p-2 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-xs font-medium flex items-center gap-2">
+                 <span className="text-lg">🎉</span> Coupon {appliedCoupon.code} applied successfully!
+              </div>
+            )}
 
             <div className="flex justify-between items-center mb-8">
               <span className="font-bold text-lg text-[var(--color-foreground)]">Total</span>

@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, clearCart } = useCart();
+  const { cart, cartTotal, clearCart, totalWithDiscount, discountAmount, appliedCoupon } = useCart();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -30,8 +30,8 @@ export default function CheckoutPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const taxes = cartTotal * 0.05;
-  const total = cartTotal + taxes;
+  const taxes = totalWithDiscount * 0.05;
+  const total = totalWithDiscount + taxes;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -145,6 +145,8 @@ export default function CheckoutPage() {
         shippingAddress: formData,
         paymentMethod: paymentMethod,
         itemsPrice: cartTotal,
+        discountPrice: discountAmount,
+        couponCode: appliedCoupon?.code || '',
         taxPrice: taxes,
         shippingPrice: 0,
         totalPrice: total,
@@ -495,6 +497,14 @@ export default function CheckoutPage() {
                 <span className="text-gray-500">Subtotal</span>
                 <span className="font-medium text-[var(--color-foreground)]">₹{cartTotal.toFixed(2)}</span>
               </div>
+              
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span>Discount ({appliedCoupon.code})</span>
+                  <span>-₹{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+
               <div className="flex justify-between">
                 <span className="text-gray-500">Tax (5%)</span>
                 <span className="font-medium text-[var(--color-foreground)]">₹{taxes.toFixed(2)}</span>
