@@ -9,11 +9,10 @@ import { useCart } from '../context/CartContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
-import CartDrawer from './CartDrawer';
 
 export default function Navbar() {
   const { wishlist } = useWishlist();
-  const { cart, toggleCart } = useCart();
+  const { cart, cartTotal } = useCart();
   const { user } = useAuth();
   const router = useRouter();
   const [localSearch, setLocalSearch] = useState('');
@@ -136,29 +135,29 @@ export default function Navbar() {
               </Link>
             </m.div>
 
-            <m.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggleCart} 
-              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all duration-200 group font-bold"
-            >
-              <div className="relative">
-                <ShoppingCart className="w-6 h-6" />
-                <AnimatePresence>
-                  {cartItemCount > 0 && (
-                    <m.span 
-                      initial={{ scale: 0, y: 10 }}
-                      animate={{ scale: 1, y: 0 }}
-                      exit={{ scale: 0, y: 10 }}
-                      className="absolute -top-3 -right-3 bg-orange-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-md"
-                    >
-                      {cartItemCount}
-                    </m.span>
-                  )}
-                </AnimatePresence>
-              </div>
-              <span className="hidden lg:block text-sm">₹{cart.reduce((s: number, i: any) => s + (i.product as any).price * i.quantity, 0).toFixed(0)}</span>
-            </m.button>
+            <m.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+              <Link 
+                href="/cart" 
+                className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all duration-200 group font-bold"
+              >
+                <div className="relative">
+                  <ShoppingCart className="w-6 h-6" />
+                  <AnimatePresence>
+                    {cartItemCount > 0 && (
+                      <m.span 
+                        initial={{ scale: 0, y: 10 }}
+                        animate={{ scale: 1, y: 0 }}
+                        exit={{ scale: 0, y: 10 }}
+                        className="absolute -top-3 -right-3 bg-orange-500 text-white text-[9px] font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-md"
+                      >
+                        {cartItemCount}
+                      </m.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <span className="hidden lg:block text-sm">₹{cartTotal.toFixed(2)}</span>
+              </Link>
+            </m.div>
 
             {/* Mobile Menu Button */}
             <m.button 
@@ -170,7 +169,6 @@ export default function Navbar() {
           </div>
         </m.div>
       </div>
-      <CartDrawer />
     </nav>
   );
 }

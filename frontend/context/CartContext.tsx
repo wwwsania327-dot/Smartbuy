@@ -24,9 +24,6 @@ type CartContextType = {
   updateQuantity: (productId: string | number, quantity: number) => void;
   clearCart: () => void;
   cartTotal: number;
-  isCartOpen: boolean;
-  setIsCartOpen: (isOpen: boolean) => void;
-  toggleCart: () => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -35,7 +32,6 @@ import { useToast } from "./ToastContext";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -107,13 +103,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return total + price * item.quantity;
   }, 0);
 
-  const toggleCart = () => setIsCartOpen(!isCartOpen);
-
   return (
     <CartContext.Provider
       value={{ 
-        cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal,
-        isCartOpen, setIsCartOpen, toggleCart 
+        cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal
       }}
     >
       {children}

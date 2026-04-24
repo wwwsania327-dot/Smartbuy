@@ -3,16 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { m, AnimatePresence } from 'framer-motion';
-import { Home, Heart, Package, User, ShoppingCart } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { Home, Heart, Package, User } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { cart } = useCart();
   const { wishlist } = useWishlist();
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlist.length;
 
   const navItems = [
@@ -24,37 +21,6 @@ export default function MobileBottomNav() {
 
   return (
     <div className="fixed z-50 transition-all duration-500 bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md md:bottom-0 md:left-0 md:translate-x-0 md:w-full md:max-w-none md:bg-white/90 md:dark:bg-gray-900/90 md:backdrop-blur-xl md:border-t md:border-gray-200 md:dark:border-white/5 md:shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
-      {/* Floating Cart Button */}
-      <AnimatePresence>
-        {cartCount > 0 && (
-          <m.div
-            initial={{ scale: 0, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0, opacity: 0, y: 20 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="absolute -top-16 right-0 md:right-6 lg:right-10"
-          >
-            <Link
-              href="/cart"
-              className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center text-white shadow-[0_12px_24px_-8px_rgba(16,185,129,0.5)] border border-white/20 relative"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              <AnimatePresence>
-                <m.span 
-                  key={cartCount}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-black min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 border-2 border-white"
-                >
-                  {cartCount}
-                </m.span>
-              </AnimatePresence>
-            </Link>
-          </m.div>
-        )}
-      </AnimatePresence>
-
       {/* Main Nav Bar */}
       <nav className="transition-all duration-300 glass rounded-[2rem] px-4 py-3 border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] md:rounded-none md:shadow-none md:bg-transparent md:border-none md:px-0 md:py-0">
         <div className="max-w-7xl mx-auto px-4 md:px-12">
