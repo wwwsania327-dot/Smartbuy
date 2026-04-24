@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, Leaf, Truck, ShieldCheck, Clock } from 'lucide-react';
 import ShopByCategory from '@/components/ShopByCategory';
 import OfferZone from '@/components/OfferZone';
+import CouponBanner from '@/components/CouponBanner';
 import ProductsPage from './products/page';
 
 export default function Home() {
@@ -58,20 +59,7 @@ export default function Home() {
 
       {/* Banner Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-        <div className="bg-gradient-to-r from-orange-400 to-rose-500 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between shadow-xl relative overflow-hidden">
-          <div className="relative z-10 max-w-xl">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Get 20% Off on your first order!</h2>
-            <p className="text-white/80 text-lg mb-6">Use code <span className="font-mono bg-white/20 px-2 py-1 rounded font-bold">FRESH20</span> at checkout.</p>
-            <Link href="/products" className="bg-white text-rose-500 px-8 py-3 rounded-full font-bold inline-block hover:scale-105 transition-transform shadow-lg">
-              Claim Offer
-            </Link>
-          </div>
-          <div className="text-9xl mt-8 md:mt-0 relative z-10 animate-pulse cursor-default">
-            🛒
-          </div>
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-2xl"></div>
-        </div>
+        <CouponBanner />
       </section>
 
       {/* Offer Zone */}

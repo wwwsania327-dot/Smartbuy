@@ -4,9 +4,13 @@ const {
   createCoupon,
   getCoupons,
   updateCoupon,
-  deleteCoupon
+  deleteCoupon,
+  getApplicableCoupon
 } = require('../controllers/couponController');
-const { protect, admin, superAdmin } = require('../middleware/authMiddleware');
+const { protect, admin, superAdmin, optionalProtect } = require('../middleware/authMiddleware');
+
+// GET applicable coupon for user
+router.get('/applicable', optionalProtect, getApplicableCoupon);
 
 // GET all coupons (Admin and SuperAdmin)
 router.route('/').get(protect, admin, getCoupons);

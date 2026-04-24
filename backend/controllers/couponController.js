@@ -1,4 +1,5 @@
 const Coupon = require('../models/Coupon');
+const Order = require('../models/Order');
 
 // @desc    Create a new coupon
 // @route   POST /api/coupons
@@ -83,9 +84,40 @@ const deleteCoupon = async (req, res) => {
   }
 };
 
+// @desc    Get applicable coupon for user
+// @route   GET /api/coupons/applicable
+// @access  Public (Optional Auth)
+const getApplicableCoupon = async (req, res) => {
+  try {
+    let usageType = 'general';
+    
+    if (req.user) {
+      const orderCount = await Order.countDocuments({ user: req.user._id });
+      if (orderCount === 0) {
+        usageType = 'first_order';
+      } else if (orderCount === 1) {
+        usageType = 'second_order';
+      }
+    }
+
+    // Find active coupon for this usageType
+    // Try specific usageType first, then fallback to general
+    let coupon = await Coupon.findOne({ usageType, isActive: true }).sort({ discount: -1 });
+    
+    if (!coupon && usageType !== 'general') {
+      coupon = await Coupon.findOne({ usageType: 'general', isActive: true }).sort({ discount: -1 });
+    }
+
+    res.json(coupon || null);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createCoupon,
   getCoupons,
   updateCoupon,
-  deleteCoupon
+  deleteCoupon,
+  getApplicableCoupon
 };

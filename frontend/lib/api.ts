@@ -90,6 +90,7 @@ export const clearNotifications = () => fetchApi('/api/users/notifications', { m
 
 // Coupons
 export const getCoupons = () => fetchApi('/api/coupons').then(res => res.json());
+export const getApplicableCoupon = () => fetchApi('/api/coupons/applicable').then(res => res.json());
 export const createCoupon = (data: any) => fetchApi('/api/coupons', { method: 'POST', body: data });
 export const updateCoupon = (id: string, data: any) => fetchApi(`/api/coupons/${id}`, { method: 'PUT', body: data });
 export const deleteCoupon = (id: string) => fetchApi(`/api/coupons/${id}`, { method: 'DELETE' });
