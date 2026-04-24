@@ -2,36 +2,60 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, X, Send, CheckCircle2 } from 'lucide-react';
+import { Star, X, Send, CheckCircle2, Loader2 } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
+import { fetchApi } from '@/lib/api';
 
 interface RatingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  productId?: string;
+  productName?: string;
 }
 
-export default function RatingModal({ isOpen, onClose }: RatingModalProps) {
+export default function RatingModal({ isOpen, onClose, productId, productName }: RatingModalProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0) {
       toast("Please select a rating", "error");
       return;
     }
+
+    if (!productId) {
+      toast("Product information missing", "error");
+      return;
+    }
     
-    // Simulate API call
-    console.log("Submitting rating:", { rating, feedback });
-    setSubmitted(true);
-    
-    setTimeout(() => {
-      toast("Thanks for your feedback!", "success");
-      handleClose();
-    }, 2000);
+    setIsLoading(true);
+    try {
+      const res = await fetchApi(`/api/products/${productId}/review`, {
+        method: 'POST',
+        body: { rating, review: feedback }
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+        setTimeout(() => {
+          toast("Thanks for your review!", "success");
+          handleClose();
+        }, 2000);
+      } else {
+        const data = await res.json();
+        toast(data.message || "Failed to submit review", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      toast("Connection error. Try again.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -126,10 +150,15 @@ export default function RatingModal({ isOpen, onClose }: RatingModalProps) {
 
                     <button
                       type="submit"
-                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
+                      disabled={isLoading}
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 group active:scale-[0.98] disabled:opacity-70"
                     >
-                      <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                      Submit Feedback
+                      {isLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      )}
+                      {isLoading ? 'Submitting...' : 'Submit Feedback'}
                     </button>
                   </form>
                 </div>

@@ -49,7 +49,7 @@ const productSchema = new mongoose.Schema({
       type: Number,
       required: true
     },
-    comment: String
+    review: String
   }],
   averageRating: {
     type: Number,

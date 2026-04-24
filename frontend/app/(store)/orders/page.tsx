@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useOrders, Order, OrderStatus } from "../../../context/OrderContext";
 import {
   Package, Clock, CheckCircle2, XCircle, RotateCcw,
-  ChevronRight, MapPin, Truck, ShoppingBag,
+  ChevronRight, MapPin, Truck, ShoppingBag, Star
 } from "lucide-react";
 import Link from "next/link";
+import RatingModal from "@/components/RatingModal";
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, {
@@ -71,7 +72,7 @@ function DeliveryProgress({ status }: { status: string }) {
 }
 
 // ─── Order Card ───────────────────────────────────────────────────────────────
-function OrderCard({ order }: { order: Order }) {
+function OrderCard({ order, onRate }: { order: Order; onRate: (productId: string, productName: string) => void }) {
   const [expanded, setExpanded] = useState(false);
   const items = order.orderItems || [];
   const itemsCount = items.length;
@@ -155,9 +156,20 @@ function OrderCard({ order }: { order: Order }) {
                     ₹{(item.price || 0).toFixed(2)} × {item.qty}
                   </p>
                 </div>
-                <span className="text-sm font-bold text-[var(--color-foreground)]">
-                  ₹{((item.price || 0) * (item.qty || 0)).toFixed(2)}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-sm font-bold text-[var(--color-foreground)]">
+                    ₹{((item.price || 0) * (item.qty || 0)).toFixed(2)}
+                  </span>
+                  {order.status === "Delivered" && (
+                    <button 
+                      onClick={() => onRate(item.product, item.name)}
+                      className="text-[10px] font-bold text-amber-600 hover:text-amber-700 flex items-center gap-0.5 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded"
+                    >
+                      <Star className="w-2.5 h-2.5 fill-current" />
+                      Rate
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -202,6 +214,15 @@ function OrderCard({ order }: { order: Order }) {
 export default function OrdersPage() {
   const { orders } = useOrders();
   const [activeFilter, setActiveFilter] = useState<OrderStatus | "all">("all");
+  const [ratingModal, setRatingModal] = useState<{ open: boolean; productId: string; productName: string }>({
+    open: false,
+    productId: '',
+    productName: '',
+  });
+
+  const handleOpenRating = (productId: string, productName: string) => {
+    setRatingModal({ open: true, productId, productName });
+  };
 
   const filtered =
     activeFilter === "all"
@@ -263,10 +284,18 @@ export default function OrdersPage() {
       ) : (
         <div className="flex flex-col gap-4">
           {filtered.map((order) => (
-            <OrderCard key={order.id} order={order} />
+            <OrderCard key={order.id} order={order} onRate={handleOpenRating} />
           ))}
         </div>
       )}
+
+      {/* Rating Modal */}
+      <RatingModal 
+        isOpen={ratingModal.open} 
+        onClose={() => setRatingModal(prev => ({ ...prev, open: false }))}
+        productId={ratingModal.productId}
+        productName={ratingModal.productName}
+      />
     </div>
   );
 }

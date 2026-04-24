@@ -164,4 +164,62 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getProductsByCategory };
+// @desc    Create new review
+// @route   POST /api/products/:id/review
+// @access  Private
+const createProductReview = async (req, res) => {
+  const { rating, review } = req.body;
+
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Check if user already reviewed
+    const alreadyReviewed = product.ratings.find(
+      (r) => r.user.toString() === req.user._id.toString()
+    );
+
+    if (alreadyReviewed) {
+      return res.status(400).json({ message: 'Product already reviewed' });
+    }
+
+    // Check if user purchased the product and it's delivered
+    const Order = require('../models/Order');
+    const order = await Order.findOne({
+      user: req.user._id,
+      'orderItems.product': req.params.id,
+      status: 'Delivered'
+    });
+
+    if (!order) {
+      return res.status(403).json({ message: 'You can only review products you have purchased and received.' });
+    }
+
+    const newReview = {
+      user: req.user._id,
+      rating: Number(rating),
+      review,
+    };
+
+    product.ratings.push(newReview);
+
+    // Update average rating
+    product.averageRating =
+      product.ratings.reduce((acc, item) => item.rating + acc, 0) /
+      product.ratings.length;
+
+    await product.save();
+    res.status(201).json({ message: 'Review added' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error adding review' });
+  }
+};
+
+module.exports = { 
+  getProducts, getProductById, createProduct, updateProduct, deleteProduct, getProductsByCategory,
+  createProductReview
+};

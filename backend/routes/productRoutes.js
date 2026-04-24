@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getProductsByCategory } = require('../controllers/productController');
+const { 
+  getProducts, getProductById, createProduct, updateProduct, 
+  deleteProduct, getProductsByCategory, createProductReview 
+} = require('../controllers/productController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 // GET /api/products - Fetch all products
@@ -14,6 +17,9 @@ router.get('/:id', getProductById);
 
 // POST /api/products - Create a product (Admin only)
 router.post('/', protect, admin, createProduct);
+
+// POST /api/products/:id/review - Create product review
+router.post('/:id/review', protect, createProductReview);
 
 // PUT /api/products/:id - Update a product
 router.put('/:id', protect, admin, updateProduct);

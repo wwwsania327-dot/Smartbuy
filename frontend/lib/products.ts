@@ -45,7 +45,9 @@ export function normalizeProduct(p: any): Product {
     id: String(p._id || p.id),
     originalPrice,
     price: salePrice,
-    image
+    image,
+    rating: p.averageRating || 0,
+    reviews: p.ratings?.length || 0
   };
 }
 
