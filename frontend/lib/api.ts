@@ -87,3 +87,9 @@ export const setDefaultAddress = (id: string) => fetchApi(`/api/users/addresses/
 export const getNotifications = () => fetchApi('/api/users/notifications').then(res => res.json());
 export const markNotificationRead = (id: string) => fetchApi(`/api/users/notifications/${id}/read`, { method: 'PUT' });
 export const clearNotifications = () => fetchApi('/api/users/notifications', { method: 'DELETE' });
+
+// Coupons
+export const getCoupons = () => fetchApi('/api/coupons').then(res => res.json());
+export const createCoupon = (data: any) => fetchApi('/api/coupons', { method: 'POST', body: data });
+export const updateCoupon = (id: string, data: any) => fetchApi(`/api/coupons/${id}`, { method: 'PUT', body: data });
+export const deleteCoupon = (id: string) => fetchApi(`/api/coupons/${id}`, { method: 'DELETE' });

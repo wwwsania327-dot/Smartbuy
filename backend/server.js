@@ -12,6 +12,7 @@ require('./models/User');
 require('./models/Category');
 require('./models/Product');
 require('./models/Order');
+require('./models/Coupon');
 
 // Route imports
 const authRoutes = require('./routes/authRoutes');
@@ -21,6 +22,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const userRoutes = require('./routes/userRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const couponRoutes = require('./routes/couponRoutes');
 
 const app = express();
 
@@ -36,6 +38,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/coupons', couponRoutes);
 
 app.get('/', (req, res) => {
   res.send('FreshCart API is running...');

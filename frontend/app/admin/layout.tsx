@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import BackButton from '../../components/BackButton';
-import { LayoutDashboard, ShoppingCart, Users, Settings, Package, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Users, Ticket, Package, LogOut } from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -71,8 +71,8 @@ export default function AdminLayout({
           <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">
             <Users className="w-5 h-5" /> Users
           </Link>
-          <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">
-            <Settings className="w-5 h-5" /> Settings
+          <Link href="/admin/coupons" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">
+            <Ticket className="w-5 h-5" /> Coupons
           </Link>
         </nav>
 
