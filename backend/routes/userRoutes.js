@@ -1,18 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { getUsers, updateUserStatus } = require('../controllers/userController');
+const { getUsers, updateUserStatus, updateUserRole } = require('../controllers/userController');
 const { 
   updateProfile, addAddress, updateAddress, deleteAddress, 
   setDefaultAddress, getNotifications, markAsRead, 
   clearAllNotifications, updateSettings 
 } = require('../controllers/userAccountController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, admin, superAdmin } = require('../middleware/authMiddleware');
 
 // GET /api/users - Fetch all users
 router.get('/', protect, admin, getUsers);
 
 // PUT /api/users/:id/status - Block or Unblock user
 router.put('/:id/status', protect, admin, updateUserStatus);
+
+// PUT /api/users/:id/role - Update user role (Superadmin only)
+router.put('/:id/role', protect, superAdmin, updateUserRole);
 
 // Profile & Settings
 router.put('/profile', protect, updateProfile);
