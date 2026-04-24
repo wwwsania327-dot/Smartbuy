@@ -49,7 +49,7 @@ export async function fetchApi(url: string, options: FetchOptions = {}) {
       if (typeof window !== 'undefined') {
         console.warn('[API] 401 Unauthorized detected. Clearing session...');
         localStorage.removeItem('token');
-        localStorage.removeItem('smartbuy_user');
+        localStorage.removeItem('user');
         
         // Only redirect if we are not already on the login page to avoid loops
         if (!window.location.pathname.includes('/login')) {

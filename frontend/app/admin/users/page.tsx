@@ -21,7 +21,9 @@ export default function AdminUsers() {
     try {
       const res = await fetchApi('/api/users');
       if (res.ok) {
-        setUsers(await res.json());
+        const data = await res.json();
+        console.log("[AdminUsers] Fetched Users:", data);
+        setUsers(data);
       }
     } catch (err) {
       console.error("Failed to fetch users", err);
@@ -31,12 +33,16 @@ export default function AdminUsers() {
   };
 
   useEffect(() => {
+    console.log("[AdminUsers] Current User State:", currentUser);
     if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
       fetchUsers();
+    } else if (currentUser) {
+      console.warn("[AdminUsers] Unauthorized role:", currentUser.role);
     }
   }, [currentUser]);
 
   const toggleUserStatus = async (id: string, currentStatus: string, role: string) => {
+    console.log(`[AdminUsers] Toggling status for ${id}, role: ${role}`);
     if (role === 'admin' || role === 'superadmin') {
        toast("Administrators cannot be blocked.", "error");
        return;
