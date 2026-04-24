@@ -160,7 +160,7 @@ function ProductCard({ product, onAdd }: { product: ProductCardData; onAdd: (p: 
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function OfferZone() {
-  const { addToCart, setIsCartOpen } = useCart();
+  const { addToCart } = useCart();
   const [products, setProducts] = useState<ProductCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -207,8 +207,6 @@ export default function OfferZone() {
       weight: product.quantity || '',
       category: product.category,
     });
-    // Open cart sidebar for immediate feedback
-    setIsCartOpen(true);
   }
 
   // Don't render section at all if no offers and not loading
