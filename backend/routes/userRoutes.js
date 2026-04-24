@@ -4,7 +4,7 @@ const { getUsers, updateUserStatus, updateUserRole } = require('../controllers/u
 const { 
   updateProfile, addAddress, updateAddress, deleteAddress, 
   setDefaultAddress, getNotifications, markAsRead, 
-  clearAllNotifications, updateSettings 
+  clearAllNotifications, updateSettings, getAddresses
 } = require('../controllers/userAccountController');
 const { protect, admin, superAdmin } = require('../middleware/authMiddleware');
 
@@ -22,6 +22,7 @@ router.put('/profile', protect, updateProfile);
 router.put('/settings', protect, updateSettings);
 
 // Addresses
+router.get('/addresses', protect, getAddresses);
 router.post('/addresses', protect, addAddress);
 router.put('/addresses/:addressId', protect, updateAddress);
 router.delete('/addresses/:addressId', protect, deleteAddress);

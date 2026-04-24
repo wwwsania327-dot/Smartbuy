@@ -184,6 +184,18 @@ const updateSettings = async (req, res) => {
   }
 };
 
+// @desc    Get user addresses
+// @route   GET /api/users/addresses
+// @access  Private
+const getAddresses = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('addresses');
+    res.json(user.addresses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching addresses' });
+  }
+};
+
 module.exports = {
   updateProfile,
   addAddress,
@@ -193,5 +205,6 @@ module.exports = {
   getNotifications,
   markAsRead,
   clearAllNotifications,
-  updateSettings
+  updateSettings,
+  getAddresses
 };

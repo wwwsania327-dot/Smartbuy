@@ -23,6 +23,8 @@ export default function CheckoutPage() {
     phone: '',
   });
 
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | "new">("new");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -32,8 +34,37 @@ export default function CheckoutPage() {
   const total = cartTotal + taxes;
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetchApi('/api/auth/profile');
+        if (res.ok) {
+          const data = await res.json();
+          const addresses = data.addresses || [];
+          setSavedAddresses(addresses);
+          
+          // Auto-select default address if available
+          const defaultAddr = addresses.find((a: any) => a.isDefault);
+          if (defaultAddr) {
+            setSelectedAddressId(defaultAddr._id);
+            setFormData({
+              fullName: defaultAddr.fullName,
+              addressLine1: defaultAddr.addressLine1,
+              addressLine2: defaultAddr.addressLine2 || '',
+              city: defaultAddr.city,
+              state: defaultAddr.state,
+              zipCode: defaultAddr.zipCode,
+              phone: defaultAddr.phone,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+      }
+    };
+
     if (user) {
       setFormData(prev => ({ ...prev, fullName: user.name }));
+      fetchProfile();
     }
   }, [user]);
 
@@ -55,6 +86,20 @@ export default function CheckoutPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (selectedAddressId !== "new") setSelectedAddressId("new");
+  };
+
+  const handleAddressSelect = (addr: any) => {
+    setSelectedAddressId(addr._id);
+    setFormData({
+      fullName: addr.fullName,
+      addressLine1: addr.addressLine1,
+      addressLine2: addr.addressLine2 || '',
+      city: addr.city,
+      state: addr.state,
+      zipCode: addr.zipCode,
+      phone: addr.phone,
+    });
   };
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -69,9 +114,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    console.log("Selected payment:", paymentMethod);
-    console.log("Sending payment method:", paymentMethod);
-
     if (!paymentMethod) {
       alert("Please select a payment method");
       return;
@@ -81,6 +123,15 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
+      // 0. Save address if it's new
+      if (selectedAddressId === "new") {
+        console.log("Saving new address to profile...");
+        await fetchApi('/api/users/addresses', {
+          method: 'POST',
+          body: formData
+        });
+      }
+
       // 1. ALWAYS Create Order in Database first
       console.log("Creating order in database...");
       const orderData = {
@@ -92,7 +143,7 @@ export default function CheckoutPage() {
           product: item.product.id
         })),
         shippingAddress: formData,
-        paymentMethod: paymentMethod, // Using state value
+        paymentMethod: paymentMethod,
         itemsPrice: cartTotal,
         taxPrice: taxes,
         shippingPrice: 0,
@@ -246,9 +297,51 @@ export default function CheckoutPage() {
         
         {/* Checkout Form */}
         <div className="flex-1 space-y-8">
+          {/* Saved Addresses Section */}
+          {savedAddresses.length > 0 && (
+            <div className="bg-[var(--color-card)] p-8 rounded-3xl border border-[var(--color-border)] shadow-sm">
+              <h2 className="text-2xl font-bold mb-6 text-[var(--color-foreground)] flex items-center gap-2">
+                <CheckCircle2 className="w-6 h-6 text-[var(--color-primary)]" /> Saved Addresses
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {savedAddresses.map((addr) => (
+                  <div 
+                    key={addr._id}
+                    onClick={() => handleAddressSelect(addr)}
+                    className={`p-4 border rounded-2xl cursor-pointer transition-all duration-200 relative ${
+                      selectedAddressId === addr._id 
+                        ? 'border-[var(--color-primary)] bg-emerald-50/30 dark:bg-emerald-900/10' 
+                        : 'border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    {selectedAddressId === addr._id && (
+                      <div className="absolute top-2 right-2">
+                        <CheckCircle2 className="w-5 h-5 text-[var(--color-primary)]" />
+                      </div>
+                    )}
+                    <p className="font-bold text-[var(--color-foreground)]">{addr.fullName}</p>
+                    <p className="text-sm text-gray-500 mt-1">{addr.phone}</p>
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">{addr.addressLine1}, {addr.city}</p>
+                    {addr.isDefault && (
+                      <span className="inline-block mt-2 text-[10px] bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full font-bold uppercase">Default</span>
+                    )}
+                  </div>
+                ))}
+                <div 
+                  onClick={() => setSelectedAddressId("new")}
+                  className={`p-4 border border-dashed rounded-2xl cursor-pointer transition-all duration-200 flex flex-col items-center justify-center text-gray-400 hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-emerald-50/10 ${
+                    selectedAddressId === "new" ? 'border-[var(--color-primary)] bg-emerald-50/20 text-[var(--color-primary)]' : ''
+                  }`}
+                >
+                  <p className="font-bold">+ Add New Address</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-[var(--color-card)] p-8 rounded-3xl border border-[var(--color-border)] shadow-sm">
             <h2 className="text-2xl font-bold mb-6 text-[var(--color-foreground)] flex items-center gap-2">
-              <Truck className="w-6 h-6 text-[var(--color-primary)]" /> Delivery Details
+              <Truck className="w-6 h-6 text-[var(--color-primary)]" /> {selectedAddressId === "new" ? "New Delivery Address" : "Confirm Delivery Address"}
             </h2>
             <form id="checkout-form" onSubmit={handleCheckout} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

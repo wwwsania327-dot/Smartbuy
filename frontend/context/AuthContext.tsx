@@ -4,6 +4,18 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter, usePathname } from 'next/navigation';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+interface Address {
+  _id?: string;
+  fullName: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  phone: string;
+  isDefault?: boolean;
+}
+
 interface UserData {
   _id: string;
   name: string;
@@ -11,6 +23,7 @@ interface UserData {
   role: 'user' | 'admin' | 'superadmin';
   status?: string;
   token?: string;
+  addresses?: Address[];
 }
 
 interface AuthContextType {
