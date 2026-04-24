@@ -39,27 +39,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // ── STEP 1: Read localStorage ──────────────────────────────
     let storedUser: UserData | null = null;
     try {
-      const rawUser = localStorage.getItem('smartbuy_user');
+      const rawUser = localStorage.getItem('user');
       const token = localStorage.getItem('token');
       
       if (rawUser && token) {
         storedUser = JSON.parse(rawUser);
-        // Ensure the token from localStorage is attached to the user object
         if (storedUser) storedUser.token = token;
       }
     } catch (e) {
       console.error('[Auth] Failed to restore session:', e);
-      localStorage.removeItem('smartbuy_user');
+      localStorage.removeItem('user');
       localStorage.removeItem('token');
     }
 
     if (storedUser) {
-      console.log('[Auth] Restored user from localStorage:', storedUser.email);
+      console.log('[Auth] Restored user from localStorage:', storedUser);
       setUser(storedUser);
     }
     
     setLoading(false);
   }, []);
+
+  // Debug log whenever user changes
+  useEffect(() => {
+    if (!loading) {
+      console.log("Current User:", user);
+    }
+  }, [user, loading]);
 
   // ── Protected route guard ─────────────────────────────────────────────────
   useEffect(() => {
@@ -70,7 +76,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.replace('/login');
         return;
       }
-      // Allow both admin and superadmin
       const isAdminFlag = user.role === 'admin' || user.role === 'superadmin';
       if (!isAdminFlag) {
         console.warn(`[AuthGuard] Unauthorized access attempt to ${pathname} by ${user.role}`);
@@ -88,15 +93,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // ── login / logout ────────────────────────────────────────────────────────
   const login = (userData: UserData) => {
-    console.log('[Auth] login() called');
+    console.log('[Auth] login() called with:', userData);
     
-    // Store token separately as requested
     if (userData.token) {
       localStorage.setItem('token', userData.token);
     }
     
     const { token, ...userWithoutToken } = userData;
-    localStorage.setItem('smartbuy_user', JSON.stringify(userWithoutToken));
+    localStorage.setItem('user', JSON.stringify(userWithoutToken));
     
     setUser(userData);
   };
@@ -104,7 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     console.log('[Auth] logout() called');
     setUser(null);
-    localStorage.removeItem('smartbuy_user');
+    localStorage.removeItem('user');
     localStorage.removeItem('token');
     router.replace('/login');
   };

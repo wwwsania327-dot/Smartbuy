@@ -93,13 +93,13 @@ export default function LoginPage() {
         _id: data._id,
         name: data.name,
         email: data.email,
-        role: data.role as 'user' | 'admin',
+        role: data.role as 'user' | 'admin' | 'superadmin',
         token: data.token,
       };
       
       login(userData);
 
-      if (data.role === 'admin') {
+      if (data.role === 'admin' || data.role === 'superadmin') {
         router.replace('/admin');
       } else {
         router.replace('/');

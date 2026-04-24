@@ -34,6 +34,7 @@ export default function Navbar() {
 
   const cartItemCount = cart.reduce((acc: number, item: any) => acc + item.quantity, 0);
   const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
+  const isSuperAdmin = user && user.role === 'superadmin';
 
   return (
     <nav className={`sticky top-0 z-50 w-full transition-all duration-500 border-b ${
@@ -105,9 +106,13 @@ export default function Navbar() {
               <m.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   href="/admin" 
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-orange-500/10 border border-white/10"
+                  className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-[10px] font-black uppercase tracking-wider shadow-lg border border-white/10 ${
+                    isSuperAdmin 
+                      ? 'bg-gradient-to-r from-amber-400 to-yellow-600 shadow-amber-500/20' 
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-indigo-500/20'
+                  }`}
                 >
-                  👑 Admin
+                  {isSuperAdmin ? '👑 Superadmin' : '🛡️ Admin'}
                 </Link>
               </m.div>
             )}

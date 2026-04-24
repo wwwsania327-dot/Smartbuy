@@ -46,11 +46,11 @@ export default function AdminLayout({
       <aside className="w-64 bg-white dark:bg-[#1e293b] border-r border-[var(--color-border)] hidden md:flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-[var(--color-border)]">
           <Link href="/admin" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              A
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm ${user?.role === 'superadmin' ? 'bg-amber-500' : 'bg-indigo-600'}`}>
+              {user?.role === 'superadmin' ? 'S' : 'A'}
             </div>
             <span className="font-bold text-xl tracking-tight text-[var(--color-foreground)]">
-              Admin<span className="text-gray-500 font-medium">Panel</span>
+              {user?.role === 'superadmin' ? 'Superadmin' : 'Admin'}<span className="text-gray-500 font-medium">Panel</span>
             </span>
           </Link>
         </div>
@@ -88,7 +88,7 @@ export default function AdminLayout({
 
         {/* Mobile Header */}
         <header className="h-16 bg-white dark:bg-[#1e293b] border-b border-[var(--color-border)] flex items-center justify-between px-4 md:hidden">
-          <span className="font-bold text-xl text-[var(--color-foreground)]">Admin</span>
+          <span className="font-bold text-xl text-[var(--color-foreground)]">{user?.role === 'superadmin' ? 'Superadmin' : 'Admin'}</span>
           <button className="p-2 text-gray-500 rounded-md hover:bg-gray-100">
             Menu
           </button>
