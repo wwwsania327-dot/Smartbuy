@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { CheckCircle, XCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type ToastType = "success" | "error";
+type ToastType = "success" | "error" | "info";
 
 interface ToastMessage {
   id: number;
@@ -17,6 +17,8 @@ interface ToastContextType {
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+import { Info } from "lucide-react";
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -48,10 +50,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg backdrop-blur-md border ${
                 t.type === "success" 
                   ? "bg-green-500/90 text-white border-green-400" 
-                  : "bg-red-500/90 text-white border-red-400"
+                  : t.type === "error"
+                  ? "bg-red-500/90 text-white border-red-400"
+                  : "bg-blue-500/90 text-white border-blue-400"
               }`}
             >
-              {t.type === "success" ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+              {t.type === "success" ? (
+                <CheckCircle className="w-5 h-5" />
+              ) : t.type === "error" ? (
+                <XCircle className="w-5 h-5" />
+              ) : (
+                <Info className="w-5 h-5" />
+              )}
               <span className="font-semibold text-sm">{t.message}</span>
               <button onClick={() => removeToast(t.id)} className="ml-2 hover:opacity-75 relative focus:outline-none">
                 <X className="w-4 h-4" />
