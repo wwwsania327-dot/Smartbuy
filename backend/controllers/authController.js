@@ -1,16 +1,7 @@
 const User = require('../models/User');
 const Otp = require('../models/Otp');
-const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
-
-// Email transporter setup using Gmail and App Password
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const { sendOtpEmail } = require('../utils/sendEmail');
 
 // Helper to generate 6-digit OTP
 const generateOTP = () => {
@@ -45,20 +36,17 @@ const sendOtp = async (req, res) => {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    // Send email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: emailLower,
-      subject: 'Your Login OTP - SmartBuy',
-      text: `Your login OTP is: ${otp}. It will expire in 5 minutes.`
-    };
+    // Send email using utility
+    const emailSent = await sendOtpEmail(emailLower, otp);
 
-    await transporter.sendMail(mailOptions);
-
-    res.json({ message: 'OTP sent successfully to email.' });
+    if (emailSent) {
+      res.json({ success: true, message: 'OTP sent successfully to email.' });
+    } else {
+      res.status(500).json({ success: false, message: 'Failed to send OTP email. Please try again later.' });
+    }
   } catch (error) {
-    console.error('Send OTP error:', error);
-    res.status(500).json({ message: 'Failed to send OTP' });
+    console.error('Send OTP Controller error:', error.message);
+    res.status(500).json({ success: false, message: 'Internal server error while sending OTP' });
   }
 };
 
