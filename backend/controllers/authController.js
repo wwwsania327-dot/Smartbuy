@@ -26,17 +26,26 @@ const sendOtp = async (req, res) => {
       return res.status(403).json({ message: 'Account has been blocked by an administrator.' });
     }
 
+    // Delete existing OTP first
+    await Otp.deleteOne({ email: emailLower });
+
     // Generate 6-digit OTP
     const otp = generateOTP();
 
-    // Save/Update OTP in DB
-    await Otp.findOneAndUpdate(
-      { email: emailLower },
-      { otp, createdAt: Date.now() },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+    // Save new OTP
+    const newOtp = new Otp({
+      email: emailLower,
+      otp,
+      createdAt: Date.now()
+    });
 
-    // Send email using utility
+    await newOtp.save();
+
+    // Debug logs
+    console.log("Generated OTP:", otp);
+    console.log("Saved OTP:", newOtp.otp);
+
+    // Send email using utility AFTER saving
     const emailSent = await sendOtpEmail(emailLower, otp);
 
     if (emailSent) {
@@ -78,8 +87,11 @@ const verifyOtp = async (req, res) => {
     }
     
     // 3. Ensure OTP comparison
-    if (otpRecord.otp !== otp) {
-      return res.status(400).json({ message: 'Invalid OTP' });
+    console.log("Entered OTP:", otp);
+    console.log("Stored OTP:", otpRecord.otp);
+
+    if (otpRecord.otp.toString() !== otp.toString()) {
+      return res.status(400).json({ message: "Invalid OTP" });
     }
 
     // OTP is valid. Now ensure User exists.
