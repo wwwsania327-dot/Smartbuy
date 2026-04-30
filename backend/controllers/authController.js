@@ -12,50 +12,64 @@ const generateOTP = () => {
 // @route   POST /api/auth/send-otp
 // @access  Public
 const sendOtp = async (req, res) => {
+  console.log("POST /api/auth/send-otp - Body:", req.body);
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+    
+    // 1. Validate input
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: 'Valid email is required' });
     }
 
     const emailLower = email.toLowerCase();
+    console.log("Processing OTP for:", emailLower);
 
-    // Check if the user is blocked
+    // 2. Check if user is blocked
     const user = await User.findOne({ email: emailLower });
     if (user && user.status === 'blocked') {
-      return res.status(403).json({ message: 'Account has been blocked by an administrator.' });
+      console.warn(`[Auth] Blocked user attempt: ${emailLower}`);
+      return res.status(403).json({ success: false, message: 'Account has been blocked by an administrator.' });
     }
 
-    // Delete existing OTP first
-    await Otp.deleteOne({ email: emailLower });
-
-    // Generate 6-digit OTP
+    // 3. Generate & Save OTP
     const otp = generateOTP();
+    console.log(`[Auth] Generated OTP for ${emailLower}: ${otp}`);
 
-    // Save new OTP
+    // Delete existing OTP and save new one
+    await Otp.deleteOne({ email: emailLower });
     const newOtp = new Otp({
       email: emailLower,
       otp,
       createdAt: Date.now()
     });
-
     await newOtp.save();
+    console.log("[Auth] OTP saved to database");
 
-    // Debug logs
-    console.log("Generated OTP:", otp);
-    console.log("Saved OTP:", newOtp.otp);
-
-    // Send email using utility AFTER saving
-    const emailSent = await sendOtpEmail(emailLower, otp);
-
-    if (emailSent) {
-      res.json({ success: true, message: 'OTP sent successfully to email.' });
-    } else {
-      res.status(500).json({ success: false, message: 'Failed to send OTP email. Please try again later.' });
+    // 4. Send Email
+    try {
+      const emailSent = await sendOtpEmail(emailLower, otp);
+      if (emailSent) {
+        console.log("[Auth] OTP email sent successfully");
+        return res.json({ success: true, message: 'OTP sent successfully to email.' });
+      } else {
+        throw new Error('Email utility returned failure');
+      }
+    } catch (emailError) {
+      console.error("[Auth] Email sending failed:", emailError.message);
+      // Even if email fails, we return a 500 JSON
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to send OTP email. Please check your SMTP settings.' 
+      });
     }
+
   } catch (error) {
-    console.error('Send OTP Controller error:', error.message);
-    res.status(500).json({ success: false, message: 'Internal server error while sending OTP' });
+    console.error('[Auth] Send OTP Controller Error:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error while sending OTP',
+      error: error.message 
+    });
   }
 };
 

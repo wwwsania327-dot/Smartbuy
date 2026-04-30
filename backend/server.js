@@ -13,6 +13,7 @@ require('./models/Category');
 require('./models/Product');
 require('./models/Order');
 require('./models/Coupon');
+require('./models/Otp');
 
 // Route imports
 const authRoutes = require('./routes/authRoutes');
@@ -42,6 +43,20 @@ app.use('/api/coupons', couponRoutes);
 
 app.get('/', (req, res) => {
   res.send('FreshCart API is running...');
+});
+
+// API 404 Handler
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ success: false, message: 'API route not found' });
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('[Global Error]:', err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error'
+  });
 });
 
 // Database Connection

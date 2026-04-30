@@ -50,12 +50,25 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetchApi(`/api/auth/send-otp`, {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/send-otp`;
+      console.log(`[Debug] Sending OTP request to: ${apiUrl}`);
+      
+      const res = await fetch(apiUrl, {
         method: 'POST',
-        body: { email },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
+      const responseText = await res.text();
+      console.log(`[Debug] Raw response from ${apiUrl}:`, responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('[Debug] Failed to parse JSON:', responseText);
+        throw new Error(`Invalid server response: ${responseText.substring(0, 50)}...`);
+      }
 
       if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
 
