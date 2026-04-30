@@ -45,16 +45,17 @@ export default function Footer() {
               <li><Link href="/products" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">All Products</Link></li>
               <li><Link href="/about" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">About Us</Link></li>
               <li><Link href="/contact" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Contact</Link></li>
+              <li><Link href="/help" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Help & FAQ</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-bold text-[var(--color-foreground)] mb-6 text-sm uppercase tracking-widest">Categories</h3>
             <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-              <li><Link href="/categories/fruits" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Fresh Fruits</Link></li>
-              <li><Link href="/categories/vegetables" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Vegetables</Link></li>
-              <li><Link href="/categories/dairy" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Dairy & Eggs</Link></li>
-              <li><Link href="/categories/bakery" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Bakery</Link></li>
+              <li><Link href="/category/fruits" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Fresh Fruits</Link></li>
+              <li><Link href="/category/vegetables" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Vegetables</Link></li>
+              <li><Link href="/category/dairy" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Dairy & Eggs</Link></li>
+              <li><Link href="/category/bakery" className="hover:text-[var(--color-primary)] transition-all duration-200 hover:pl-1">Bakery</Link></li>
             </ul>
           </div>
 

@@ -50,7 +50,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/send-otp`;
+      const apiUrl = `/api/auth/send-otp`;
       console.log(`[Debug] Sending OTP request to: ${apiUrl}`);
       
       const res = await fetch(apiUrl, {
