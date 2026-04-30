@@ -30,7 +30,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
             <WishlistProvider>
               <OrderProvider>
                 <CartProvider>
-                  <LazyMotion features={domAnimation} strict>
+                  <LazyMotion features={domAnimation} strict={false}>
                     {children}
                     <ReactQueryDevtools initialIsOpen={false} />
                   </LazyMotion>
