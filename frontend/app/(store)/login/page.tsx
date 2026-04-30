@@ -53,11 +53,15 @@ export default function LoginPage() {
       const apiUrl = `/api/auth/send-otp`;
       console.log(`[Debug] Sending OTP request to: ${apiUrl}`);
       
-      const res = await fetch(apiUrl, {
+      const res = await fetchApi(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: { email },
       });
+
+      // Handle non-JSON or error responses gracefully
+      if (res.status === 502 || res.status === 504) {
+        throw new Error('The server is currently waking up or unreachable. Please try again in a few seconds.');
+      }
 
       const responseText = await res.text();
       console.log(`[Debug] Raw response from ${apiUrl}:`, responseText);
@@ -67,15 +71,20 @@ export default function LoginPage() {
         data = JSON.parse(responseText);
       } catch (parseError) {
         console.error('[Debug] Failed to parse JSON:', responseText);
-        throw new Error(`Invalid server response: ${responseText.substring(0, 50)}...`);
+        // If it's not JSON, it might be an error page
+        if (responseText.includes('ROUTER_EXTERNAL_TARGET_ERROR') || responseText.includes('An error occurred')) {
+          throw new Error('Backend service is temporarily unavailable. Please try again shortly.');
+        }
+        throw new Error('Received an unexpected response from the server.');
       }
 
       if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
 
       setMessage('OTP has been successfully sent to your email.');
       setStep(2);
-      setTimeLeft(60); // 60 seconds cooldown for resend
+      setTimeLeft(60); 
     } catch (err: any) {
+      console.error('[Auth] Send OTP Error:', err);
       setError(err.message || 'An error occurred. Please try again later.');
     } finally {
       setIsLoading(false);
