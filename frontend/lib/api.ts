@@ -31,9 +31,13 @@ export async function fetchApi(url: string, options: FetchOptions = {}) {
   }
 
   // 3. Prepare config
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
   const config: RequestInit = {
     ...options,
     headers,
+    signal: controller.signal
   };
 
   // Stringify body if it's an object
@@ -43,6 +47,7 @@ export async function fetchApi(url: string, options: FetchOptions = {}) {
 
   try {
     const response = await fetch(url, config);
+    clearTimeout(timeoutId);
 
     // 4. Handle 401 Unauthorized globally
     if (response.status === 401) {

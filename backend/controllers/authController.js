@@ -46,10 +46,11 @@ const sendOtp = async (req, res) => {
     console.log("[Auth] OTP saved to database");
 
     // 4. Send Email
+    console.log(`[Auth] Attempting to send email to ${emailLower}...`);
     try {
       const emailSent = await sendOtpEmail(emailLower, otp);
       if (emailSent) {
-        console.log("[Auth] OTP email sent successfully");
+        console.log(`[Auth] OTP email sent successfully to ${emailLower}`);
         return res.json({ success: true, message: 'OTP sent successfully to email.' });
       } else {
         throw new Error('Email utility returned failure');

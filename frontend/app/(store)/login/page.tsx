@@ -85,7 +85,11 @@ export default function LoginPage() {
       setTimeLeft(60); 
     } catch (err: any) {
       console.error('[Auth] Send OTP Error:', err);
-      setError(err.message || 'An error occurred. Please try again later.');
+      if (err.name === 'AbortError') {
+        setError('The request timed out. This may be due to a slow internet connection or the server taking too long to wake up. Please try again.');
+      } else {
+        setError(err.message || 'An error occurred. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }
