@@ -71,11 +71,8 @@ export default function LoginPage() {
         data = JSON.parse(responseText);
       } catch (parseError) {
         console.error('[Debug] Failed to parse JSON:', responseText);
-        // If it's not JSON, it might be an error page
-        if (responseText.includes('ROUTER_EXTERNAL_TARGET_ERROR') || responseText.includes('An error occurred')) {
-          throw new Error('Backend service is temporarily unavailable. Please try again shortly.');
-        }
-        throw new Error('Received an unexpected response from the server.');
+        // If it's not JSON, it might be an error page (404/500)
+        throw new Error('The server returned an invalid response (HTML instead of JSON). This usually means the backend URL is misconfigured or the server is down.');
       }
 
       if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
@@ -107,8 +104,13 @@ export default function LoginPage() {
         body: { email, otp },
       });
 
-      const data = await res.json();
-
+      const responseText = await res.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error('Invalid response from server during verification.');
+      }
 
       if (!res.ok) throw new Error(data.message || 'Invalid OTP');
 
